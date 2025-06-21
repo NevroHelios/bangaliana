@@ -334,7 +334,7 @@ const MediaPostCreator = () => {
         console.log(`[DEBUG] FormData field: ${pair[0]} =`, pair[1]);
       }
 
-      const apiUrl = 'http://192.168.47.91:10000/api/posts/createpost';
+      const apiUrl = `http://192.168.233.236:10000/api/posts/createpost`;
       console.log('[DEBUG] Sending POST request to', apiUrl);
 
       const response = await fetch(apiUrl, {
