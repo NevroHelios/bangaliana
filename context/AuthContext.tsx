@@ -14,6 +14,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
+  updateBookmarks: (bookmarkedPosts: string[]) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -106,8 +107,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log('Register response status:', response.status);
       console.log('Register response data:', data);
 
-      if (response.ok && data.success) {
-        return data.message;
+      if (response.ok && data.token) {
+        setToken(data.token);
+        setUser(data.user);
+        await SecureStore.setItemAsync('userToken', data.token);
+        await SecureStore.setItemAsync('userData', JSON.stringify(data.user));
+        return true;
       } else {
         throw new Error(data.message || 'An unexpected error occurred during registration.');
       }
@@ -125,8 +130,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await SecureStore.deleteItemAsync(TOKEN_KEY);
   };
 
+  const updateBookmarks = (bookmarkedPosts: string[]) => {
+    if (user) {
+      const updatedUser = { ...user, bookmarkedPosts };
+      setUser(updatedUser);
+      SecureStore.setItemAsync('userData', JSON.stringify(updatedUser));
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, isLoading, login, register, logout, updateBookmarks }}>
       {children}
     </AuthContext.Provider>
   );

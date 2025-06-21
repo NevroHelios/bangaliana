@@ -68,21 +68,39 @@ function CustomDrawerContent(props: any) {
         </Pressable>
 
         <Pressable 
-          style={[styles.drawerItem, pathname === '/photos' && { backgroundColor: primaryContainerColor as string}]}
-          onPress={() => router.push('/photos' as any)}
+          style={[styles.drawerItem, pathname === '/feed' && { backgroundColor: primaryContainerColor as string}]}
+          onPress={() => router.push('/feed' as any)}
         >
           <Ionicons 
-            name="camera-outline" 
+            name="newspaper-outline" 
             size={22} 
-            color={pathname === '/photos' ? onPrimaryContainerColor as string : theme.onSurfaceVariant} 
+            color={pathname === '/feed' ? onPrimaryContainerColor as string : theme.onSurfaceVariant} 
           />
           <ThemedText style={[
             styles.drawerItemText, 
             { 
-              color: pathname === '/photos' ? onPrimaryContainerColor as string : onSurfaceColor as string,
-              fontWeight: pathname === '/photos' ? '700' : '500',
+              color: pathname === '/feed' ? onPrimaryContainerColor as string : onSurfaceColor as string,
+              fontWeight: pathname === '/feed' ? '700' : '500',
             }
-          ]}>Photos</ThemedText>
+          ]}>Feed</ThemedText>
+        </Pressable>
+
+        <Pressable 
+          style={[styles.drawerItem, pathname === '/bookmarks' && { backgroundColor: primaryContainerColor as string}]}
+          onPress={() => router.push('/bookmarks' as any)}
+        >
+          <Ionicons 
+            name="bookmark-outline" 
+            size={22} 
+            color={pathname === '/bookmarks' ? onPrimaryContainerColor as string : theme.onSurfaceVariant} 
+          />
+          <ThemedText style={[
+            styles.drawerItemText, 
+            { 
+              color: pathname === '/bookmarks' ? onPrimaryContainerColor as string : onSurfaceColor as string,
+              fontWeight: pathname === '/bookmarks' ? '700' : '500',
+            }
+          ]}>Bookmarks</ThemedText>
         </Pressable>
 
         <Pressable 
@@ -199,9 +217,15 @@ const DrawerLayout = () => {
         }}
       />
       <Drawer.Screen
-        name="photos"
+        name="feed"
         options={{
-          title: 'Photos',
+          title: 'Feed',
+        }}
+      />
+      <Drawer.Screen
+        name="bookmarks"
+        options={{
+          title: 'Bookmarks',
         }}
       />
       <Drawer.Screen
