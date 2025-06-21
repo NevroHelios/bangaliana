@@ -18,14 +18,20 @@ const DrawerLayout = () => {
   return (
     <Drawer
       screenOptions={{
-        headerShown: true,
+        headerShown: true, 
         headerTransparent: true,
+        headerTitle: '', 
+        headerLeft: undefined, 
+        headerRight: () => null,
         headerStyle: {
-          backgroundColor: colorScheme === 'dark' ? theme.glassHeader : theme.background,
+          backgroundColor: 'transparent', 
+          elevation: 0,
+          shadowOpacity: 0, 
+          borderBottomWidth: 0,
         },
         headerTintColor: theme.onBackground,
         drawerActiveBackgroundColor: theme.primary,
-        drawerActiveTintColor: theme.onPrimary,
+        drawerActiveTintColor: 'white',
         drawerInactiveTintColor: theme.onSurfaceVariant,
         drawerLabelStyle: {
           marginLeft: 0,

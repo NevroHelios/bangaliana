@@ -58,7 +58,7 @@ export const Colors = {
     inactiveTabIcon: "rgb(142, 142, 147)", // Apple's gray for inactive icons
   },
   dark: {
-    primary: "rgb(130, 190, 255)", // Lighter blue for dark mode
+    primary: "rgb(18, 18, 19)", // Lighter blue for dark mode
     onPrimary: "rgb(0, 40, 80)",
     primaryContainer: "rgb(0, 60, 120)",
     onPrimaryContainer: "rgb(200, 225, 255)",
