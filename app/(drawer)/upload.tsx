@@ -581,21 +581,8 @@ const MediaPostCreator = () => {
             textAlignVertical="top"
           />
         </View>
-        <View style={styles.inputGroup}>
-          <ThemedText type="defaultSemiBold" style={styles.label}>Location</ThemedText>
-          <ThemedView style={styles.locationContainer}>
-            {isFetchingLocation ? (
-              <ActivityIndicator size="small" color={primaryColor as string} />
-            ) : postData.location ? (
-              <ThemedText style={styles.locationTextDisplay}>{postData.location.name}</ThemedText>
-            ) : (
-              <ThemedText style={styles.locationTextDisplay}>Location not available</ThemedText>
-            )}
-            <TouchableOpacity onPress={fetchUserLocation} disabled={isFetchingLocation}>
-              <Ionicons name="refresh-circle" size={24} color={isFetchingLocation ? onSurfaceVariantColor as string : primaryColor as string} />
-            </TouchableOpacity>
-          </ThemedView>
-        </View>
+
+        
 
         <View style={styles.inputGroup}>
           <ThemedText type="defaultSemiBold" style={styles.label}>Visibility</ThemedText>
@@ -1034,7 +1021,7 @@ const styles = StyleSheet.create({
   nextStepButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
+    paddingVertical: 50,
     paddingHorizontal: 16,
     borderRadius: 12,
     marginTop: 16,

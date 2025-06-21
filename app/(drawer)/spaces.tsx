@@ -120,6 +120,7 @@ const MessageBubble = ({
     const onPrimaryColor = useThemeColor({}, 'onPrimary');
     const onSurfaceColor = useThemeColor({}, 'onSurface');
     const onSurfaceVariantColor = useThemeColor({}, 'onSurfaceVariant');
+    const backgroundColor = useThemeColor({}, 'background');
   
     const handlePlayPause = async () => {
       if (currentlyPlayingId && currentlyPlayingId !== message.id) {
@@ -169,51 +170,87 @@ const MessageBubble = ({
     };
   
     return (
-      <View style={[styles.messageRow, { justifyContent: isUser ? 'flex-end' : 'flex-start' }]}> 
-        <View style={isUser ? {alignItems: 'flex-end'} : {alignItems: 'flex-start'}}>
-            <View style={[
-              styles.messageBubble,
-              isUser
-                ? { backgroundColor: primaryColor as string, borderBottomRightRadius: 4 }
-                : { backgroundColor: surfaceColor as string, borderBottomLeftRadius: 4 }
-            ]}>
-              <ThemedText style={{ color: isUser ? onPrimaryColor as string : onSurfaceColor as string }}>
-                {message.text}
-              </ThemedText>
+      <View style={styles.messageContainer}>
+        {/* Avatar section */}
+        <View style={styles.avatarContainer}>
+          {!isUser && (
+            <View style={[styles.avatar, { backgroundColor: primaryColor as string }]}>
+              <IconSymbol name="sparkles" size={14} color={onPrimaryColor as string} />
             </View>
-            {!isUser && (
-                <View style={styles.bubbleActions}>
-                    <Pressable onPress={handlePlayPause} style={styles.actionButton} disabled={!message.audioData}>
-                        <IconSymbol 
-                            name={isPlaying ? "speaker.wave.3.fill" : "speaker.wave.2.fill"} 
-                            size={18} 
-                            color={message.audioData ? (onSurfaceVariantColor as string) : '#ccc'}
-                        />
-                    </Pressable>
-                    <Pressable onPress={() => handleFeedback('up')} style={styles.actionButton}>
-                        <IconSymbol 
-                            name="hand.thumbsup"
-                            size={18}
-                            color={message.feedback === 'up' ? primaryColor as string : onSurfaceVariantColor as string}
-                        />
-                    </Pressable>
-                     <Pressable onPress={() => handleFeedback('down')} style={styles.actionButton}>
-                        <IconSymbol 
-                            name="hand.thumbsdown"
-                            size={18} 
-                            color={message.feedback === 'down' ? primaryColor as string : onSurfaceVariantColor as string}
-                        />
-                    </Pressable>
-                </View>
-            )}
+          )}
+        </View>
+        
+        {/* Message content */}
+        <View style={styles.messageContent}>
+          <View style={[
+            styles.messageBubble,
+            isUser
+              ? styles.userBubble
+              : [styles.assistantBubble, { backgroundColor: backgroundColor as string }]
+          ]}>
+            <ThemedText style={{ 
+              color: isUser ? onPrimaryColor as string : onSurfaceColor as string,
+              fontSize: 15,
+              lineHeight: 20
+            }}>
+              {message.text}
+            </ThemedText>
+          </View>
+          
+          {/* Action buttons for assistant messages */}
+          {!isUser && (
+            <View style={styles.actionButtonsContainer}>
+              <Pressable 
+                onPress={handlePlayPause} 
+                style={[styles.actionButton, { opacity: message.audioData ? 1 : 0.3 }]}
+                disabled={!message.audioData}
+              >
+                <IconSymbol 
+                  name={isPlaying ? "speaker.wave.3.fill" : "speaker.wave.2.fill"} 
+                  size={16} 
+                  color={onSurfaceVariantColor as string}
+                />
+              </Pressable>
+              
+              <Pressable 
+                onPress={() => handleFeedback('up')} 
+                style={[
+                  styles.actionButton,
+                  message.feedback === 'up' && styles.activeActionButton
+                ]}
+              >
+                <IconSymbol 
+                  name="hand.thumbsup"
+                  size={16}
+                  color={message.feedback === 'up' ? primaryColor as string : onSurfaceVariantColor as string}
+                />
+              </Pressable>
+              
+              <Pressable 
+                onPress={() => handleFeedback('down')} 
+                style={[
+                  styles.actionButton,
+                  message.feedback === 'down' && styles.activeActionButton
+                ]}
+              >
+                <IconSymbol 
+                  name="hand.thumbsdown"
+                  size={16} 
+                  color={message.feedback === 'down' ? primaryColor as string : onSurfaceVariantColor as string}
+                />
+              </Pressable>
+            </View>
+          )}
         </View>
       </View>
     );
 };
   
 const ProgressIndicator = ({ state }: { state: ProcessingState }) => {
-    const surfaceColor = useThemeColor({}, 'surface');
+    const backgroundColor = useThemeColor({}, 'background');
     const onSurfaceVariantColor = useThemeColor({}, 'onSurfaceVariant');
+    const primaryColor = useThemeColor({}, 'primary');
+    const onPrimaryColor = useThemeColor({}, 'onPrimary');
     const dot1 = useRef(new Animated.Value(0)).current;
     const dot2 = useRef(new Animated.Value(0)).current;
     const dot3 = useRef(new Animated.Value(0)).current;
@@ -249,14 +286,24 @@ const ProgressIndicator = ({ state }: { state: ProcessingState }) => {
     });
   
     return (
-      <View style={[styles.messageRow, { justifyContent: 'flex-start' }]}>
-        <View style={[styles.messageBubble, { backgroundColor: surfaceColor as string, borderBottomLeftRadius: 4, flexDirection: 'row', alignItems: 'center' }]}>
-          <ThemedText style={{ color: onSurfaceVariantColor as string, marginRight: 8 }}>
-            {statusText[state]}
-          </ThemedText>
-          <Animated.View style={[styles.typingDot, { backgroundColor: onSurfaceVariantColor as string }, animatedStyle(dot1)]} />
-          <Animated.View style={[styles.typingDot, { backgroundColor: onSurfaceVariantColor as string }, animatedStyle(dot2)]} />
-          <Animated.View style={[styles.typingDot, { backgroundColor: onSurfaceVariantColor as string }, animatedStyle(dot3)]} />
+      <View style={styles.messageContainer}>
+        <View style={styles.avatarContainer}>
+          <View style={[styles.avatar, { backgroundColor: primaryColor as string }]}>
+            <IconSymbol name="sparkles" size={14} color={onPrimaryColor as string} />
+          </View>
+        </View>
+        
+        <View style={styles.messageContent}>
+          <View style={[styles.messageBubble, styles.assistantBubble, { backgroundColor: backgroundColor as string }]}>
+            <View style={styles.typingContainer}>
+              <ThemedText style={{ color: onSurfaceVariantColor as string, marginRight: 8, fontSize: 15 }}>
+                {statusText[state]}
+              </ThemedText>
+              <Animated.View style={[styles.typingDot, { backgroundColor: onSurfaceVariantColor as string }, animatedStyle(dot1)]} />
+              <Animated.View style={[styles.typingDot, { backgroundColor: onSurfaceVariantColor as string }, animatedStyle(dot2)]} />
+              <Animated.View style={[styles.typingDot, { backgroundColor: onSurfaceVariantColor as string }, animatedStyle(dot3)]} />
+            </View>
+          </View>
         </View>
       </View>
     );
@@ -468,7 +515,7 @@ export default function SpacesScreen() {
 }
 
 
-// --- Styles (Unchanged) ---
+// --- Styles (Updated for ChatGPT-like layout) ---
 const styles = StyleSheet.create({
     container: { flex: 1 },
     flex: { flex: 1 },
@@ -478,30 +525,75 @@ const styles = StyleSheet.create({
       flexGrow: 1,
       justifyContent: 'flex-end'
     },
-    messageRow: {
+    messageContainer: {
       flexDirection: 'row',
-      marginVertical: 4,
+      marginVertical: 8,
+      paddingHorizontal: 4,
+    },
+    avatarContainer: {
+      width: 30,
+      alignItems: 'center',
+      paddingTop: 2,
+    },
+    avatar: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    messageContent: {
+      flex: 1,
+      marginLeft: 12,
     },
     messageBubble: {
-      borderRadius: 20,
       paddingHorizontal: 16,
-      paddingVertical: 10,
-      maxWidth: '100%',
-      elevation: 1,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 1,
+      paddingVertical: 12,
+      maxWidth: '90%',
+    },
+    userBubble: {
+      backgroundColor: '#007AFF',
+      borderRadius: 18,
+      borderBottomRightRadius: 6,
+      alignSelf: 'flex-end',
+      marginRight: 34, // Space for where avatar would be
+    },
+    assistantBubble: {
+      borderRadius: 18,
+      borderBottomLeftRadius: 6,
+      borderWidth: 1,
+      borderColor: 'rgba(0,0,0,0.1)',
+    },
+    actionButtonsContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 8,
+      marginLeft: 4,
+    },
+    actionButton: {
+      padding: 8,
+      marginRight: 4,
+      borderRadius: 6,
+      backgroundColor: 'transparent',
+    },
+    activeActionButton: {
+      backgroundColor: 'rgba(0, 122, 255, 0.1)',
+    },
+    typingContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    typingDot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      marginHorizontal: 2,
     },
     bubbleActions: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingLeft: 12,
         marginTop: 8,
-    },
-    actionButton: {
-        padding: 4,
-        marginRight: 12,
     },
     inputContainer: {
       flexDirection: 'row',
@@ -528,12 +620,6 @@ const styles = StyleSheet.create({
       borderRadius: 20,
       justifyContent: 'center',
       alignItems: 'center',
-    },
-    typingDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      marginHorizontal: 3,
     },
     emptyStateContainer: {
         ...StyleSheet.absoluteFillObject,

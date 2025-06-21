@@ -1,302 +1,229 @@
-import { useThemeColor } from '@/hooks/useThemeColor';
-import { MediaItem } from '@/types';
-import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useHeaderHeight } from '@react-navigation/elements';
-import { BlurView } from 'expo-blur';
-import * as Haptics from 'expo-haptics';
-import { Image } from 'expo-image';
-import { useFocusEffect, useNavigation } from 'expo-router';
-import React, { useCallback, useLayoutEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
-    Alert,
-    Dimensions,
-    Modal,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
-    ImageBackground
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+  View,
+  Text,
+  FlatList,
+  Image,
+  ActivityIndicator,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
+import { useAuth } from "../../context/AuthContext";
 
-export const STORAGE_KEY = 'heritage_media';
-const { width } = Dimensions.get('window');
-
-const PhotoViewerModal = ({ media, visible, onClose, onDelete }: { 
-    media: MediaItem | null; 
-    visible: boolean; 
-    onClose: () => void; 
-    onDelete: (media: MediaItem) => void; 
-}) => {
-    if (!media) return null;
-    const { top, bottom } = useSafeAreaInsets();
-    return (
-        <Modal
-            animationType="fade"
-            transparent={true}
-            visible={visible}
-            onRequestClose={onClose}>
-            <BlurView intensity={100} tint="dark" style={styles.viewerContainer}>
-                <Pressable onPress={onClose} style={[styles.viewerCloseButton, {top: top + 10}]}>
-                    <Ionicons name="close" size={24} color="white" />
-                </Pressable>
-                <Image
-                    source={{ uri: media.uri }}
-                    style={[styles.viewerImage, { aspectRatio: media.aspectRatio }]}
-                    contentFit="contain"
-                />
-                <View style={[styles.viewerActions, { bottom: bottom + 20 }]}>
-                    <Pressable
-                        onPress={() => onDelete(media)}
-                        style={styles.actionButton}
-                    >
-                        <Ionicons name="trash-outline" size={24} color="white" />
-                        <Text style={styles.actionText}>Delete</Text>
-                    </Pressable>
-                </View>
-            </BlurView>
-        </Modal>
-    );
-};
-
-export default function PhotosScreen() {
-  const [media, setMedia] = useState<MediaItem[]>([]);
-  const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const navigation = useNavigation();
-  const headerHeight = useHeaderHeight();
-
-  const backgroundColor = useThemeColor({}, 'background');
-  const onSurfaceColor = useThemeColor({}, 'onSurface');
-  const surfaceVariantColor = useThemeColor({}, 'surfaceVariant');
-  const onSurfaceVariantColor = useThemeColor({}, 'onSurfaceVariant');
-
-  const loadMedia = useCallback(async () => {
-    try {
-      const savedMedia = await AsyncStorage.getItem(STORAGE_KEY);
-      setMedia(savedMedia ? JSON.parse(savedMedia) : []);
-    } catch (error) {
-      console.error('Error loading media:', error);
-    }
-  }, []);
-
-  useFocusEffect(useCallback(() => { loadMedia(); }, [loadMedia]));
-
-  const saveMedia = async (newMedia: MediaItem[]) => {
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newMedia));
-    } catch (error) {
-      console.error('Error saving media:', error);
-    }
-  };
-
-  const deleteMedia = (mediaToDelete: MediaItem) => {
-    Alert.alert(
-      'Delete Photo',
-      'Are you sure you want to delete this photo?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            const updatedMedia = media.filter(
-              (item) => item.id !== mediaToDelete.id
-            );
-            setMedia(updatedMedia);
-            saveMedia(updatedMedia);
-            setSelectedMedia(null);
-            Haptics.notificationAsync(
-              Haptics.NotificationFeedbackType.Success
-            );
-          },
-        },
-      ]
-    );
-  };
-  
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTitle: () => (
-         <View style={[styles.searchContainer, { backgroundColor: 'transparent' }]}>
-            <Ionicons name="search" size={18} color={onSurfaceVariantColor as string}/>
-            <TextInput
-                placeholder='Search Archive'
-                style={[styles.searchInput, {color: onSurfaceColor as string}]}
-                placeholderTextColor={'white'}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-            />
-        </View>
-      ),
-      headerTransparent: true,
-      headerStyle: {
-        backgroundColor: 'rgba(0,0,0,0.3)',
-      }
-    });
-  }, [navigation, searchQuery, onSurfaceColor, surfaceVariantColor, onSurfaceVariantColor]);
-
-  const filteredMedia = media.filter(item => 
-    item.id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  const leftColumnMedia = filteredMedia.filter((_, index) => index % 2 === 0);
-  const rightColumnMedia = filteredMedia.filter((_, index) => index % 2 === 1);
-
-  const renderMasonryItem = (item: MediaItem) => (
-    <Pressable 
-      key={item.id} 
-      style={styles.masonryItem} 
-      onPress={() => { 
-        setSelectedMedia(item); 
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); 
-      }}
-    >
-      <Image 
-        source={{ uri: item.uri }} 
-        style={{ width: '100%', aspectRatio: item.aspectRatio || 1 }} 
-      />
-    </Pressable>
-  );
-
-  return (
-    <ImageBackground
-      source={require('@/assets/images/heritage2.avif')}
-      style={styles.backgroundImage}
-      resizeMode="cover"
-    >
-      <View style={styles.overlay} />
-      <ScrollView 
-        contentContainerStyle={{ 
-          paddingTop: headerHeight + 20, 
-          paddingHorizontal: 8,
-          paddingBottom: 20
-        }}
-      >
-        {filteredMedia.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="images-outline" size={64} color="rgba(255,255,255,0.5)" />
-            <Text style={styles.emptyStateText}>No photos in your archive</Text>
-            <Text style={styles.emptyStateSubtext}>
-              Your heritage photos will appear here
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.masonryContainer}>
-            <View style={styles.column}>
-              {leftColumnMedia.map(renderMasonryItem)}
-            </View>
-            <View style={styles.column}>
-              {rightColumnMedia.map(renderMasonryItem)}
-            </View>
-          </View>
-        )}
-      </ScrollView>
-      <PhotoViewerModal 
-        media={selectedMedia} 
-        visible={!!selectedMedia} 
-        onClose={() => setSelectedMedia(null)} 
-        onDelete={deleteMedia} 
-      />
-    </ImageBackground>
-  );
+interface MediaItem {
+  _id: string;
+  uri: string;
+  type: "photo" | "video";
+  title?: string;
+  description?: string;
+  location?: { name?: string; latitude?: number; longitude?: number };
 }
 
+interface Comment {
+  _id: string;
+  userName: string;
+  text: string;
+  timestamp: string | number;
+}
+
+interface Post {
+  _id: string;
+  title?: string;
+  description?: string;
+  mediaItems: MediaItem[];
+  tags: string[];
+  location?: { type: string; coordinates: number[]; name?: string };
+  likes: any[];
+  comments: Comment[];
+  featured: boolean;
+  visibility: string;
+  aiSummary?: any;
+  culturalContext?: any;
+  creativeContext?: any;
+  travelContext?: any;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const Photos = () => {
+  const { token, user } = useAuth();
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!token || !user?.id) return;
+    const fetchPosts = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(
+          `http://192.168.233.236:10000/api/posts?userId=${user?.id}&limit=100`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (!res.ok) throw new Error("Failed to fetch posts");
+        const data = await res.json();
+        setPosts(data.posts || data);
+      } catch (err: any) {
+        setError(err.message || "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPosts();
+  }, [token, user]);
+
+  if (loading)
+    return (
+      <ActivityIndicator
+        style={{ marginTop: 40 }}
+        size="large"
+        color="#8B5CF6"
+      />
+    );
+  if (error) return <Text style={{ color: "red", margin: 20 }}>{error}</Text>;
+
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
+      <FlatList
+        data={posts}
+        keyExtractor={(item) => item._id}
+        renderItem={({ item }) => (
+          <View style={styles.card}>
+            <Text style={styles.title}>{item.title || "Untitled Post"}</Text>
+            <Text style={styles.desc}>{item.description}</Text>
+            {item.mediaItems && item.mediaItems.length > 0 && (
+              <ScrollView horizontal style={{ marginVertical: 8 }}>
+                {item.mediaItems.map((media) => (
+                  <Image
+                    key={media._id}
+                    source={{ uri: media.uri }}
+                    style={styles.image}
+                  />
+                ))}
+              </ScrollView>
+            )}
+            {item.location && (
+              <Text style={styles.loc}>
+                Location: {item.location.name || ""} [
+                {item.location.coordinates?.join(", ")}]
+              </Text>
+            )}
+            {item.tags && item.tags.length > 0 && (
+              <Text style={styles.tags}>Tags: {item.tags.join(", ")}</Text>
+            )}
+            <Text>Visibility: {item.visibility}</Text>
+            <Text>Featured: {item.featured ? "Yes" : "No"}</Text>
+            <Text>Likes: {item.likes?.length || 0}</Text>
+            <Text>Comments: {item.comments?.length || 0}</Text>
+            {item.aiSummary && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>AI Summary:</Text>
+                <Text>{item.aiSummary.summary}</Text>
+              </View>
+            )}
+            {item.culturalContext && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Cultural Context:</Text>
+                <Text>{JSON.stringify(item.culturalContext)}</Text>
+              </View>
+            )}
+            {item.creativeContext && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Creative Context:</Text>
+                <Text>{JSON.stringify(item.creativeContext)}</Text>
+              </View>
+            )}
+            {item.travelContext && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Travel Context:</Text>
+                <Text>{JSON.stringify(item.travelContext)}</Text>
+              </View>
+            )}
+            {item.comments && item.comments.length > 0 && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Comments:</Text>
+                {item.comments.map((c) => (
+                  <Text key={c._id} style={styles.comment}>
+                    {c.userName}: {c.text}
+                  </Text>
+                ))}
+              </View>
+            )}
+            <Text style={styles.date}>
+              Posted: {new Date(item.createdAt).toLocaleString()}
+            </Text>
+          </View>
+        )}
+        ListEmptyComponent={
+          <Text style={{ textAlign: "center", margin: 40 }}>
+            No posts found.
+          </Text>
+        }
+      />
+    </ScrollView>
+  );
+};
+
 const styles = StyleSheet.create({
-    backgroundImage: {
-        flex: 1,
-    },
-    overlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    },
-    searchContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 12,
-        borderRadius: 12,
-        width: width * 0.7,
-        height: 40,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    },
-    searchInput: {
-        flex: 1,
-        marginLeft: 8,
-        height: '100%'
-    },
-    masonryContainer: {
-        flexDirection: 'row',
-    },
-    column: {
-        flex: 1,
-        paddingHorizontal: 4,
-    },
-    masonryItem: {
-        marginBottom: 8,
-        borderRadius: 12,
-        overflow: 'hidden',
-        backgroundColor: 'rgba(238, 238, 238, 0.8)',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-    },
-    emptyState: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingVertical: 100,
-    },
-    emptyStateText: {
-        fontSize: 20,
-        fontWeight: '600',
-        color: 'white',
-        marginTop: 16,
-        textAlign: 'center',
-    },
-    emptyStateSubtext: {
-        fontSize: 16,
-        color: 'rgba(255, 255, 255, 0.7)',
-        marginTop: 8,
-        textAlign: 'center',
-    },
-    viewerContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    viewerImage: {
-        width: '90%',
-        borderRadius: 16,
-    },
-    viewerCloseButton: {
-        position: 'absolute',
-        right: 16,
-        padding: 8,
-        borderRadius: 100,
-        backgroundColor: 'rgba(0,0,0,0.5)'
-    },
-    viewerActions: {
-        position: 'absolute',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        width: '100%',
-        paddingHorizontal: 40,
-    },
-    actionButton: {
-        alignItems: 'center',
-        gap: 8,
-        backgroundColor: 'rgba(220, 38, 38, 0.8)',
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        borderRadius: 12,
-    },
-    actionText: {
-        color: 'white',
-        fontWeight: '600',
-    }
+  card: {
+    backgroundColor: "#f9f9f9",
+    margin: 12,
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  image: {
+    width: 120,
+    height: 120,
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  title: {
+    fontWeight: "bold",
+    fontSize: 18,
+    marginBottom: 4,
+  },
+  desc: {
+    fontSize: 15,
+    marginBottom: 4,
+  },
+  loc: {
+    fontSize: 14,
+    color: "#555",
+    marginBottom: 2,
+  },
+  tags: {
+    fontSize: 13,
+    color: "#666",
+    marginBottom: 2,
+  },
+  section: {
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  sectionTitle: {
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  comment: {
+    fontSize: 13,
+    color: "#333",
+    marginLeft: 8,
+  },
+  date: {
+    fontSize: 12,
+    color: "#888",
+    marginTop: 6,
+  },
 });
+
+export default Photos;
