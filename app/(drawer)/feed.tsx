@@ -6,6 +6,7 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import { Post, Comment } from "@/types"; // Make sure your types are correctly imported
 import PostDetailModal from "@/components/PostDetailModal";
 import { PostCard } from "@/components/feed/PostCard"; // Import the new PostCard
+// import RecommendationsModal from "@/components/RecommendationsModal";
 
 const Feed = () => {
   const { token } = useAuth();
@@ -13,6 +14,9 @@ const Feed = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [recommendationsVisible, setRecommendationsVisible] = useState(false);
+  const [similarPosts, setSimilarPosts] = useState<Post[]>([]);
   const bgColor = useThemeColor({}, "background");
   const primaryColor = useThemeColor({}, "primary");
   const textColor = useThemeColor({}, "onSurface");
@@ -101,9 +105,20 @@ const Feed = () => {
       />
       <PostDetailModal
         post={selectedPost}
-        isVisible={!!selectedPost}
-        onClose={() => setSelectedPost(null)}
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onShowRecommendations={() => {
+          if (selectedPost) {
+            fetchSimilarPosts(selectedPost._id);
+            setRecommendationsVisible(true);
+          }
+        }}
       />
+      {/* <RecommendationsModal
+        visible={recommendationsVisible}
+        onClose={() => setRecommendationsVisible(false)}
+        posts={similarPosts}
+      /> */}
     </>
   );
 };

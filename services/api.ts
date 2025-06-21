@@ -4,7 +4,7 @@ import * as FileSystem from 'expo-file-system';
 
 const FAS_FAST_URL = "https://testing-80wh.onrender.com" // for fast api testing
 
-const API_BASE_URL = "http://192.168.174.91:10000"
+const API_BASE_URL = "http://192.168.233.236:10000"
 // Accepts audioUri (file path), sends as file in FormData
 export const getAudioTranscription = async (audioUri: string): Promise<string> => {
   try {

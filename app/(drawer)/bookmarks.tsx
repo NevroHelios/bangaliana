@@ -26,7 +26,7 @@ const BookmarksScreen = () => {
     setError(null);
     try {
       const res = await fetch(
-        `http://192.168.174.91:10000/api/users/bookmarks`,
+        `http://192.168.233.236:10000/api/users/bookmarks`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -35,7 +35,9 @@ const BookmarksScreen = () => {
       );
       if (!res.ok) {
         const errorData = await res.text();
-        throw new Error(`Failed to fetch bookmarks: ${res.status} ${errorData}`);
+        throw new Error(
+          `Failed to fetch bookmarks: ${res.status} ${errorData}`
+        );
       }
       const data = await res.json();
       setPosts(data);
@@ -53,16 +55,16 @@ const BookmarksScreen = () => {
   );
 
   const handleLikeUpdate = (postId: string, newLikes: string[]) => {
-    setPosts(prevPosts =>
-      prevPosts.map(post =>
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
         post._id === postId ? { ...post, likes: newLikes } : post
       )
     );
   };
 
   const handleCommentUpdate = (postId: string, newComments: any[]) => {
-    setPosts(prevPosts =>
-      prevPosts.map(post =>
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
         post._id === postId ? { ...post, comments: newComments } : post
       )
     );
@@ -70,14 +72,28 @@ const BookmarksScreen = () => {
 
   if (loading)
     return (
-      <View style={[styles.container, { backgroundColor: bgColor, justifyContent: 'center' }]}>
-        <ActivityIndicator size="large" color={useThemeColor({}, 'primary')} />
+      <View
+        style={[
+          styles.container,
+          { backgroundColor: bgColor, justifyContent: "center" },
+        ]}
+      >
+        <ActivityIndicator size="large" color={useThemeColor({}, "primary")} />
       </View>
     );
 
   if (error)
     return (
-      <View style={[styles.container, { backgroundColor: bgColor, justifyContent: 'center', alignItems: 'center' }]}>
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: bgColor,
+            justifyContent: "center",
+            alignItems: "center",
+          },
+        ]}
+      >
         <Text style={{ color: "red", margin: 20 }}>{error}</Text>
       </View>
     );
@@ -85,12 +101,32 @@ const BookmarksScreen = () => {
   return (
     <FlatList
       data={posts}
-      renderItem={({ item }) => <PostCard item={item} onLike={handleLikeUpdate} onComment={handleCommentUpdate} />}
+      renderItem={({ item }) => (
+        <PostCard
+          item={item}
+          onLike={handleLikeUpdate}
+          onComment={handleCommentUpdate}
+        />
+      )}
       keyExtractor={(item) => item._id}
       contentContainerStyle={{ backgroundColor: bgColor, paddingTop: 10 }}
       ListEmptyComponent={
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', height: Dimensions.get('window').height * 0.7 }}>
-          <Text style={{ textAlign: "center", margin: 40, fontSize: 16, color: useThemeColor({}, 'onSurface') }}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            height: Dimensions.get("window").height * 0.7,
+          }}
+        >
+          <Text
+            style={{
+              textAlign: "center",
+              margin: 40,
+              fontSize: 16,
+              color: useThemeColor({}, "onSurface"),
+            }}
+          >
             You haven't bookmarked any posts yet.
           </Text>
         </View>
@@ -105,4 +141,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BookmarksScreen; 
+export default BookmarksScreen;

@@ -1,14 +1,20 @@
-import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
-import * as SecureStore from 'expo-secure-store';
-import { Alert } from 'react-native';
-import { API_BASE_URL } from '@/config/config';
-const API_URL = "http://192.168.174.91:10000";
-const TOKEN_KEY = 'auth-token';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  ReactNode,
+} from "react";
+import * as SecureStore from "expo-secure-store";
+import { Alert } from "react-native";
+import { API_BASE_URL } from "@/config/config";
+const API_URL = "http://192.168.233.236:10000";
+const TOKEN_KEY = "auth-token";
 
 interface User {
   id: string;
   email: string;
-  name:string;
+  name: string;
 }
 
 interface AuthContextData {
@@ -35,7 +41,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (storedToken) {
           const response = await fetch(`${API_URL}/me`, {
             headers: {
-              'Authorization': `Bearer ${storedToken}`,
+              Authorization: `Bearer ${storedToken}`,
             },
           });
 
@@ -60,19 +66,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     try {
       const response = await fetch(`${API_URL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+        throw new Error(data.message || "Login failed");
       }
       setToken(data.token);
       setUser(data.user);
       await SecureStore.setItemAsync(TOKEN_KEY, data.token);
     } catch (error) {
-      Alert.alert('Login Error', (error as Error).message);
+      Alert.alert("Login Error", (error as Error).message);
       throw error;
     }
   };
@@ -80,19 +86,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (name: string, email: string, password: string) => {
     try {
       const response = await fetch(`${API_URL}/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
       });
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
+        throw new Error(data.message || "Registration failed");
       }
       setToken(data.token);
       setUser(data.user);
       await SecureStore.setItemAsync(TOKEN_KEY, data.token);
     } catch (error) {
-      Alert.alert('Registration Error', (error as Error).message);
+      Alert.alert("Registration Error", (error as Error).message);
       throw error;
     }
   };
@@ -123,8 +129,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
-
