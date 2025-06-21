@@ -300,7 +300,7 @@ const MediaPostCreator = () => {
         }
       }
 
-      const apiUrl = 'http://192.168.47.91:10000/createpost';
+      const apiUrl = 'http://192.168.47.91:10000/api/posts/createpost';
       console.log('[DEBUG] Sending POST request to', apiUrl);
 
       const response = await fetch(apiUrl, {
