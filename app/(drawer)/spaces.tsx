@@ -26,8 +26,8 @@ async function getAudioTranscription(audioUri: string): Promise<string> {
     const formData = new FormData();
     formData.append('audio', {
       uri: audioUri,
-      type: 'audio/m4a',
-      name: 'recording.m4a',
+      type: 'audio/wav',
+      name: 'recording.wav',
     } as any);
 
     const response = await fetch(`${BASE_URL}/get_transcript`, {
@@ -163,12 +163,12 @@ const MessageBubble = ({
         <View style={[
           styles.messageBubble,
           isUser
-            ? [styles.userBubble, { backgroundColor: primaryColor as string }]
-            : [styles.assistantBubble, { backgroundColor: 'rgba(11, 1, 1, 0.22)' }]
+            ? [styles.userBubble, { backgroundColor: 'rgba(135, 130, 130, 0.12)' }]
+            : [styles.assistantBubble, { backgroundColor: 'rgba(151, 147, 147, 0.22)' }]
         ]}>
           <ThemedText style={[
             styles.messageText,
-            { color: isUser ? onPrimaryColor as string : 'white' }
+            { color: isUser ? 'white' : 'white' }
           ]}>
             {message.text}
           </ThemedText>
@@ -428,7 +428,7 @@ export default function SpacesScreen() {
                 value={input}
                 onChangeText={setInput}
                 placeholder={isRecording ? "Listening..." : "Message Heritage AI"}
-                placeholderTextColor="#999999"
+                placeholderTextColor="white"
                 multiline
                 editable={!isRecording && !isProcessing}
               />
@@ -438,17 +438,17 @@ export default function SpacesScreen() {
                 style={({ pressed }) => [
                   styles.sendButton,
                   {
-                      backgroundColor: isRecording ? errorColor as string : primaryColor as string,
+                      backgroundColor: isRecording ? errorColor as string : 'black',
                       opacity: pressed || isProcessing ? 0.8 : 1
                   },
                 ]}
               >
                 {isProcessing && !isRecording ? (
-                    <ActivityIndicator color={onPrimaryColor as string} size="small" />
+                    <ActivityIndicator color={'white'} size="small" />
                 ) : (
                     <IconSymbol
                         name={input.trim() ? 'arrow.up' : 'mic.fill'}
-                        color={onPrimaryColor as string}
+                        color={'white'}
                         size={20}
                     />
                 )}
@@ -571,7 +571,7 @@ const styles = StyleSheet.create({
     inputWrapper: {
       flexDirection: 'row',
       alignItems: 'flex-end',
-      backgroundColor: '#333333',
+      backgroundColor: 'rgba(255, 255, 255, 0.15)',
       borderRadius: 24,
       paddingLeft: 16,
       paddingRight: 4,
@@ -615,7 +615,7 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: '#333333',
+        backgroundColor: 'rgba(255, 255, 255, 0.47)',
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 24,
