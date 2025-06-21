@@ -3,7 +3,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useRef, useState } from "react";
-import { Animated, Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Animated, Dimensions, FlatList, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
@@ -16,6 +16,9 @@ export default function HomeScreen() {
   const featuredAnim = useRef(new Animated.Value(0)).current;
   const popularAnim = useRef(new Animated.Value(0)).current;
   const featured2Anim = useRef(new Animated.Value(0)).current;
+  const bannerAnim = useRef(new Animated.Value(0)).current;
+  const banner2Anim = useRef(new Animated.Value(0)).current;
+  const banner3Anim = useRef(new Animated.Value(0)).current;
 
   const collageImages = [
     {
@@ -80,22 +83,31 @@ export default function HomeScreen() {
     },
   ];
 
+  const featuredCollections = [
+    { id: "1", source: require("@/assets/images/kolkata.jpg"), title: "Kolkata Vibes" },
+    { id: "2", source: require("@/assets/images/durgapujo.jpg"), title: "Durga Pujo", },
+    { id: "3", source: require("@/assets/images/play.jpg"), title: "Stories", },
+    { id: "4", source: require("@/assets/images/krishna.jpg"), title: "Divine Hues", },
+    { id: "5", source: require("@/assets/images/heritage2.avif"), title: "Heritage", },
+    { id: "6", source: require("@/assets/images/kolkata.jpg"), title: "City Life",  },
+  ];
+
   const slideToNext = () => {
     const nextIndex = currentImageIndex + 1;
     
     if (nextIndex >= collageImages.length) {
-      // At the last image, slide to the duplicate first image
+  
       Animated.timing(slideAnim, {
         toValue: -nextIndex * width,
         duration: 600,
         useNativeDriver: true,
       }).start(() => {
-        // After animation, instantly jump to the real first image
+       
         slideAnim.setValue(0);
         setCurrentImageIndex(0);
       });
     } else {
-      // Normal slide
+  
       Animated.timing(slideAnim, {
         toValue: -nextIndex * width,
         duration: 600,
@@ -117,10 +129,10 @@ export default function HomeScreen() {
     };
   }, [currentImageIndex]);
 
-  // Trigger animations when component mounts
+
   useEffect(() => {
     const animateSequence = () => {
-      // Stagger the animations for a smooth entrance effect
+  
       Animated.sequence([
         Animated.timing(featuredAnim, {
           toValue: 1,
@@ -140,10 +152,27 @@ export default function HomeScreen() {
           delay: 200,
           useNativeDriver: true,
         }),
+        Animated.timing(bannerAnim, {
+          toValue: 1,
+          duration: 800,
+          delay: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(banner2Anim, {
+          toValue: 1,
+          duration: 800,
+          delay: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(banner3Anim, {
+          toValue: 1,
+          duration: 800,
+          delay: 200,
+          useNativeDriver: true,
+        }),
       ]).start();
     };
 
-    // Start animations after a short delay
     setTimeout(animateSequence, 500);
   }, []);
 
@@ -182,21 +211,17 @@ export default function HomeScreen() {
 
   const collageItems = createCollageItems();
 
-  const renderCarouselDots = () => (
-    <View style={styles.dotsContainer}>
-      {collageImages.map((_, index) => (
-        <View
-          key={index}
-          style={[
-            styles.dot,
-            {
-              backgroundColor: index === currentImageIndex % collageImages.length ? 'white' : 'rgba(255, 255, 255, 0.4)',
-              transform: [{ scale: index === currentImageIndex % collageImages.length ? 1.2 : 1 }],
-            }
-          ]}
-        />
-      ))}
-    </View>
+  const renderFeaturedItem = ({ item }: { item: any }) => (
+    <Pressable style={[styles.featuredCarouselItem]}>
+      <Image
+        source={item.source}
+        style={styles.featuredCarouselImage}
+        contentFit="cover"
+      />
+      <View style={styles.featuredCarouselOverlay}>
+        <Text style={styles.featuredCarouselTitle}>{item.title}</Text>
+      </View>
+    </Pressable>
   );
 
   return (
@@ -204,14 +229,14 @@ export default function HomeScreen() {
       headerBackgroundColor={{ light: "black", dark: "black" }}
       headerImage={
         <View style={styles.headerContainer}>
-          {/* Carousel Container */}
+    
           <View style={styles.carouselContainer}>
             <Animated.View
               style={[
                 styles.carouselSlider,
                 {
                   transform: [{ translateX: slideAnim }],
-                  width: width * (collageImages.length + 1), // +1 for duplicate first image
+                  width: width * (collageImages.length + 1), 
                 }
               ]}
             >
@@ -230,7 +255,7 @@ export default function HomeScreen() {
                   />
                 </View>
               ))}
-              {/* Duplicate first image for seamless loop */}
+     
               <View key="duplicate-first" style={styles.slideContainer}>
                 <Image
                   source={collageImages[0].source}
@@ -255,11 +280,12 @@ export default function HomeScreen() {
           <View style={styles.overlayContent}>
             <Text style={styles.mainTitle}>বাংলার ঐতিহ্য</Text>
           </View>
+       
         </View>
       }
     >
       <ScrollView style={styles.contentContainer}>
-        {/* First Featured Collections Section */}
+    
         <Animated.View 
           style={[
             styles.sectionContainer,
@@ -276,31 +302,23 @@ export default function HomeScreen() {
             }
           ]}
         >
-          <Text style={styles.sectionTitle}>Featured Collections</Text>
-          <ScrollView
+          <Text style={styles.enhancedSectionTitle}>Featured Collections</Text>
+          <FlatList
+            data={featuredCollections}
             horizontal
             showsHorizontalScrollIndicator={false}
-            style={styles.horizontalScroll}
-          >
-            {collageImages.map((item, index) => (
-              <View
-                key={item.id}
-                style={[styles.featureBox, { backgroundColor: item.color }]}
-              >
-                <Image
-                  source={item.source}
-                  style={styles.featureImage}
-                  contentFit="cover"
-                />
-              </View>
-            ))}
-          </ScrollView>
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.featuredCarouselContainer}
+            renderItem={renderFeaturedItem}
+            scrollEnabled={true}
+            pagingEnabled={false}
+            decelerationRate="normal"
+          />
         </Animated.View>
 
-        {/* Popular Collections Section */}
         <Animated.View 
           style={[
-            styles.sectionContainerL, // Using sectionContainerL for larger bottom margin
+            styles.sectionContainerL,
             {
               opacity: popularAnim,
               transform: [
@@ -314,8 +332,8 @@ export default function HomeScreen() {
             }
           ]}
         >
-          <Text style={styles.sectionTitle}>Popular Collections</Text>
-          {/* Standard Instagram Grid */}
+          <Text style={styles.enhancedSectionTitle}>Popular Collections</Text>
+   
           <View style={styles.instagramGrid}>
             <View style={styles.leftGrid}>
               {collageImages.slice(0, 4).map((item, index) => (
@@ -339,7 +357,6 @@ export default function HomeScreen() {
             )}
           </View>
 
-          {/* Reverse Instagram Grid (formerly Heritage Gallery) */}
           <View style={styles.reverseInstagramGrid}>
             <View style={styles.rightGrid}>
               {collageImages.slice(6, 10).map((item) => (
@@ -364,7 +381,84 @@ export default function HomeScreen() {
           </View>
         </Animated.View>
 
-        {/* Second Featured Collections Section */}
+        <Animated.View 
+          style={[
+            styles.bannerSectionContainer,
+            {
+              opacity: bannerAnim,
+              transform: [
+                {
+                  translateY: bannerAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [50, 0],
+                  }),
+                },
+              ],
+            }
+          ]}
+        >
+          <Pressable style={styles.bannerContainer}>
+            <Image source={require("@/assets/images/heritage2.avif")} style={styles.bannerImage}/>
+            <View style={styles.bannerOverlay}/>
+            <View style={styles.bannerTextContainer}>
+              <Text style={styles.bannerTitle}>Explore the Unseen</Text>
+              <Text style={styles.bannerSubtitle}>Journey through hidden gems of Bengal's heritage.</Text>
+            </View>
+          </Pressable>
+        </Animated.View>
+
+        <Animated.View 
+          style={[
+            styles.bannerSectionContainer,
+            {
+              opacity: banner2Anim,
+              transform: [
+                {
+                  translateY: banner2Anim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [50, 0],
+                  }),
+                },
+              ],
+            }
+          ]}
+        >
+          <Pressable style={styles.bannerContainer}>
+            <Image source={require("@/assets/images/durgapujo.jpg")} style={styles.bannerImage}/>
+            <View style={styles.bannerOverlay}/>
+            <View style={styles.bannerTextContainer}>
+              <Text style={styles.bannerTitle}>Cultural Treasures</Text>
+              <Text style={styles.bannerSubtitle}>Immerse yourself in the rich tapestry of Bengali traditions.</Text>
+            </View>
+          </Pressable>
+        </Animated.View>
+
+        <Animated.View 
+          style={[
+            styles.bannerSectionContainer,
+            {
+              opacity: banner3Anim,
+              transform: [
+                {
+                  translateY: banner3Anim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [50, 0],
+                  }),
+                },
+              ],
+            }
+          ]}
+        >
+          <Pressable style={styles.bannerContainer}>
+            <Image source={require("@/assets/images/krishna.jpg")} style={styles.bannerImage}/>
+            <View style={styles.bannerOverlay}/>
+            <View style={styles.bannerTextContainer}>
+              <Text style={styles.bannerTitle}>Timeless Stories</Text>
+              <Text style={styles.bannerSubtitle}>Discover the legends and tales that shaped our culture.</Text>
+            </View>
+          </Pressable>
+        </Animated.View>
+
         <Animated.View 
           style={[
             styles.sectionContainer,
@@ -381,7 +475,7 @@ export default function HomeScreen() {
             }
           ]}
         >
-          <Text style={styles.sectionTitle}>Trending Collections</Text>
+          <Text style={styles.enhancedSectionTitle}>Trending Collections</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -487,11 +581,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sectionContainer: {
-    marginVertical: 20,
+    marginVertical: 10,
   },
   sectionContainerL: {
     marginVertical: 20,
-    marginBottom: 40,
+    marginBottom: 20,
+  },
+  bannerSectionContainer: {
+    marginVertical: 8,
   },
   sectionTitle: {
     fontSize: 22,
@@ -500,6 +597,17 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     textAlign: "center",
     letterSpacing: 0.5,
+  },
+  enhancedSectionTitle: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "white",
+    textAlign: "center",
+    margin: 0,
+    marginVertical: 20,
+    textShadowColor: "#f0d7d7",
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
   },
   horizontalScroll: {
     paddingLeft: 20,
@@ -525,16 +633,118 @@ const styles = StyleSheet.create({
     height: "100%",
     opacity: 0.7,
   },
+  featuredCarouselContainer: {
+    paddingLeft: 20,
+    paddingRight: 8,
+  },
+  featuredCarouselItem: {
+    width: width * 0.4,
+    height: width * 0.5,
+    borderRadius: 16,
+    overflow: "hidden",
+    marginRight: 16,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+    position: "relative",
+  },
+  featuredCarouselImage: {
+    width: "100%",
+    height: "100%",
+    opacity: 0.8,
+  },
+  featuredCarouselOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "30%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "transparent",
+  },
+  featuredCarouselTitle: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    textShadowColor: "rgba(0, 0, 0, 0.8)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+  },
+
+  bannerContainer: {
+    height: 150,
+    marginHorizontal: 20,
+    borderRadius: 16,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  bannerImage: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: "100%",
+    height: "100%",
+  },
+  bannerOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.4)'
+  },
+  bannerTextContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    padding: 20,
+  },
+  bannerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: "center",
+    textShadowColor: "rgba(0,0,0,0.7)",
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
+  },
+  bannerSubtitle: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.9)',
+    marginTop: 8,
+    textAlign: "center",
+    textShadowColor: "rgba(0,0,0,0.5)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
   instagramGrid: {
     flexDirection: "row",
     marginHorizontal: 15,
     height: 250,
   },
   reverseInstagramGrid: {
-    flexDirection: 'row-reverse', // Key change for reverse layout
+    flexDirection: 'row-reverse',
     marginHorizontal: 15,
     height: 250,
-    marginTop: 8, // Adds a small gap between the two grids
+    marginTop: 8,
   },
   leftGrid: {
     flex: 2,
@@ -542,7 +752,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     height: "100%",
   },
-  rightGrid: { // Essentially the same as leftGrid, just for clarity
+  rightGrid: {
     flex: 2,
     flexDirection: "row",
     flexWrap: "wrap",
@@ -560,9 +770,9 @@ const styles = StyleSheet.create({
     height: "100%",
     position: "relative",
   },
-  reverseLargeGridItem: { // For the reversed layout
+  reverseLargeGridItem: {
     flex: 1,
-    paddingRight: 4, // Padding on the opposite side
+    paddingRight: 4,
     height: "100%",
     position: "relative",
   },

@@ -60,7 +60,7 @@ export const Colors = {
   dark: {
     primary: "rgb(18, 18, 19)", // Lighter blue for dark mode
     onPrimary: "rgb(0, 40, 80)",
-    primaryContainer: "rgb(0, 60, 120)",
+    primaryContainer: "rgb(4, 10, 16)",
     onPrimaryContainer: "rgb(200, 225, 255)",
     secondary: "rgb(160, 190, 210)", // Lighter muted blue/gray
     onSecondary: "rgb(20, 40, 55)",
