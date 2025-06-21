@@ -55,13 +55,9 @@ export default function SignupScreen() {
     }
     setIsLoading(true);
     try {
-      const successMessage = await register(name, email, password);
-      if (typeof successMessage === 'string' && successMessage) {
-        Alert.alert(
-          "Registration Successful",
-          successMessage,
-          [{ text: "OK", onPress: () => router.replace("/(auth)/login") }]
-        );
+      const success = await register(name, email, password);
+      if (success) {
+        router.replace("/(drawer)/explore");
       }
     } catch (e) {
       const error = e as Error;

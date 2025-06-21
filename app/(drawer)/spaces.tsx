@@ -557,6 +557,12 @@ const styles = StyleSheet.create({
       backgroundColor: '#FFFFFF',
       marginHorizontal: 2,
     },
+    bubbleActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingLeft: 12,
+        marginTop: 8,
+    },
     inputContainer: {
       paddingHorizontal: 16,
       paddingBottom: 16,

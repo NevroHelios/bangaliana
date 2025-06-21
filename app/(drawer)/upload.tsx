@@ -25,6 +25,7 @@ import {
   View,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
+import { API_BASE_URL } from '@/config/config';
 
 const { width } = Dimensions.get('window');
 
@@ -338,7 +339,7 @@ const MediaPostCreator = () => {
         console.log(`[DEBUG] FormData field: ${pair[0]} =`, pair[1]);
       }
 
-      const apiUrl = `http://192.168.244.255:10000/api/posts/createpost`;
+      const apiUrl = `${API_BASE_URL}/api/posts/createpost`;
       console.log('[DEBUG] Sending POST request to', apiUrl);
 
       const response = await fetch(apiUrl, {

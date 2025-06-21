@@ -16,8 +16,9 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
+import { API_BASE_URL } from '@/config/config';
 
-const BACKEND_URL = "http://192.168.244.255:10000";
+const BACKEND_URL = API_BASE_URL;
 
 const LensScreen = () => {
     const { token } = useAuth();

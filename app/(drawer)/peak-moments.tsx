@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config/config';
 import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/context/AuthContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -8,7 +9,7 @@ import React, { useRef, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const BACKEND_URL = "http://192.168.244.255:10000";
+const BACKEND_URL = API_BASE_URL;
 
 const PeakMomentsScreen = () => {
   const { token } = useAuth();
