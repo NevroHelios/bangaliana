@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect, useContext, ReactNode } from
 import * as SecureStore from 'expo-secure-store';
 import { Alert } from 'react-native';
 
-const API_URL = 'http://192.168.47.91:10000/api';
+const API_URL = "http://192.168.233.236:10000";// Fallback for local development
 const TOKEN_KEY = 'auth-token';
 
 interface User {
