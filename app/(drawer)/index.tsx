@@ -622,7 +622,8 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
   },
   horizontalScroll: {
-    paddingLeft: 20,
+    paddingLeft: 10,
+    paddingBottom: '10%',
   },
   featureBox: {
     width: 200,

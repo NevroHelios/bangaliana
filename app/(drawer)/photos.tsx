@@ -6,28 +6,31 @@ import { useHeaderHeight } from '@react-navigation/elements';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
-import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
+import { useFocusEffect, useNavigation } from 'expo-router';
 import React, { useCallback, useLayoutEffect, useState } from 'react';
 import {
-    ActionSheetIOS,
     Alert,
     Dimensions,
     Modal,
-    Platform,
     Pressable,
     ScrollView,
     StyleSheet,
     Text,
     TextInput,
-    View
+    View,
+    ImageBackground
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export const STORAGE_KEY = 'heritage_media';
 const { width } = Dimensions.get('window');
 
-const PhotoViewerModal = ({ media, visible, onClose, onDelete, onUpload }: { media: MediaItem | null; visible: boolean; onClose: () => void; onDelete: (media: MediaItem) => void; onUpload: (media: MediaItem) => void; }) => {
+const PhotoViewerModal = ({ media, visible, onClose, onDelete }: { 
+    media: MediaItem | null; 
+    visible: boolean; 
+    onClose: () => void; 
+    onDelete: (media: MediaItem) => void; 
+}) => {
     if (!media) return null;
     const { top, bottom } = useSafeAreaInsets();
     return (
@@ -47,13 +50,6 @@ const PhotoViewerModal = ({ media, visible, onClose, onDelete, onUpload }: { med
                 />
                 <View style={[styles.viewerActions, { bottom: bottom + 20 }]}>
                     <Pressable
-                        onPress={() => onUpload(media)}
-                        style={styles.actionButton}
-                    >
-                        <Ionicons name="share-outline" size={24} color="white" />
-                        <Text style={styles.actionText}>Upload to Post</Text>
-                    </Pressable>
-                    <Pressable
                         onPress={() => onDelete(media)}
                         style={styles.actionButton}
                     >
@@ -66,22 +62,18 @@ const PhotoViewerModal = ({ media, visible, onClose, onDelete, onUpload }: { med
     );
 };
 
-
 export default function PhotosScreen() {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const router = useRouter();
   const navigation = useNavigation();
   const headerHeight = useHeaderHeight();
-  const { top } = useSafeAreaInsets();
 
   const backgroundColor = useThemeColor({}, 'background');
   const onSurfaceColor = useThemeColor({}, 'onSurface');
   const surfaceVariantColor = useThemeColor({}, 'surfaceVariant');
   const onSurfaceVariantColor = useThemeColor({}, 'onSurfaceVariant');
-  const primaryColor = useThemeColor({}, 'primary');
 
   const loadMedia = useCallback(async () => {
     try {
@@ -100,23 +92,6 @@ export default function PhotosScreen() {
     } catch (error) {
       console.error('Error saving media:', error);
     }
-  };
-
-    const addMedia = (uri: string, type: 'photo' | 'video', aspectRatio?: number) => {
-    const newMediaItem: MediaItem = {
-      id: Date.now().toString(),
-      uri,
-      type,
-      timestamp: Date.now(),
-      aspectRatio,
-      userId: 'user123', // Dummy user ID
-      likes: [],
-      comments: [],
-    };
-    const updatedMedia = [newMediaItem, ...media];
-    setMedia(updatedMedia);
-    saveMedia(updatedMedia);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
   const deleteMedia = (mediaToDelete: MediaItem) => {
@@ -143,106 +118,109 @@ export default function PhotosScreen() {
       ]
     );
   };
-
-  const handleUpload = (mediaToUpload: MediaItem) => {
-    router.push({
-      pathname: '/(drawer)/upload',
-      params: {
-        imageUri: mediaToUpload.uri,
-        imageAspectRatio: mediaToUpload.aspectRatio?.toString(),
-      },
-    });
-    setSelectedMedia(null);
-  };
-
-  const pickMedia = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      const asset = result.assets[0];
-      const aspectRatio = asset.width && asset.height ? asset.width / asset.height : 1;
-      addMedia(asset.uri, asset.type === 'video' ? 'video' : 'photo', aspectRatio);
-    }
-  };
-
-  const handleAddPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    if (Platform.OS === 'ios') {
-        ActionSheetIOS.showActionSheetWithOptions(
-          {
-            options: ['Cancel', 'Take Photo or Video', 'Choose from Library'],
-            cancelButtonIndex: 0,
-          },
-          (buttonIndex) => {
-            if (buttonIndex === 1) router.push('/camera');
-            if (buttonIndex === 2) pickMedia();
-          }
-        );
-    } else {
-        Alert.alert('Add Media', 'Choose an option', [
-            { text: 'Take Photo or Video', onPress: () => router.push('/camera') },
-            { text: 'Choose from Library', onPress: () => pickMedia() },
-            { text: 'Cancel', style: 'cancel' }
-        ])
-    }
-  };
   
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <Pressable onPress={handleAddPress} style={{ marginRight: 16 }}>
-          <Ionicons name="add-circle" size={28} color={primaryColor as string} />
-        </Pressable>
-      ),
       headerTitle: () => (
-         <View style={[styles.searchContainer, { backgroundColor: surfaceVariantColor as string }]}>
+         <View style={[styles.searchContainer, { backgroundColor: 'transparent' }]}>
             <Ionicons name="search" size={18} color={onSurfaceVariantColor as string}/>
             <TextInput
                 placeholder='Search Archive'
                 style={[styles.searchInput, {color: onSurfaceColor as string}]}
-                placeholderTextColor={onSurfaceVariantColor as string}
+                placeholderTextColor={'white'}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
             />
         </View>
-      )
+      ),
+      headerTransparent: true,
+      headerStyle: {
+        backgroundColor: 'rgba(0,0,0,0.3)',
+      }
     });
-  }, [navigation, searchQuery, onSurfaceColor, surfaceVariantColor, onSurfaceVariantColor, primaryColor]);
+  }, [navigation, searchQuery, onSurfaceColor, surfaceVariantColor, onSurfaceVariantColor]);
 
-  const filteredMedia = media.filter(item => item.id.includes(searchQuery.toLowerCase()));
+  const filteredMedia = media.filter(item => 
+    item.id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   const leftColumnMedia = filteredMedia.filter((_, index) => index % 2 === 0);
   const rightColumnMedia = filteredMedia.filter((_, index) => index % 2 === 1);
 
   const renderMasonryItem = (item: MediaItem) => (
-    <Pressable key={item.id} style={styles.masonryItem} onPress={() => { setSelectedMedia(item); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}>
-      <Image source={{ uri: item.uri }} style={{ width: '100%', aspectRatio: item.aspectRatio }} />
+    <Pressable 
+      key={item.id} 
+      style={styles.masonryItem} 
+      onPress={() => { 
+        setSelectedMedia(item); 
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); 
+      }}
+    >
+      <Image 
+        source={{ uri: item.uri }} 
+        style={{ width: '100%', aspectRatio: item.aspectRatio || 1 }} 
+      />
     </Pressable>
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: backgroundColor as string }}>
-        <ScrollView contentContainerStyle={{ paddingTop: headerHeight, paddingHorizontal: 8 }}>
-            <View style={styles.masonryContainer}>
-                <View style={styles.column}>{leftColumnMedia.map(renderMasonryItem)}</View>
-                <View style={styles.column}>{rightColumnMedia.map(renderMasonryItem)}</View>
+    <ImageBackground
+      source={require('@/assets/images/heritage2.avif')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay} />
+      <ScrollView 
+        contentContainerStyle={{ 
+          paddingTop: headerHeight + 20, 
+          paddingHorizontal: 8,
+          paddingBottom: 20
+        }}
+      >
+        {filteredMedia.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Ionicons name="images-outline" size={64} color="rgba(255,255,255,0.5)" />
+            <Text style={styles.emptyStateText}>No photos in your archive</Text>
+            <Text style={styles.emptyStateSubtext}>
+              Your heritage photos will appear here
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.masonryContainer}>
+            <View style={styles.column}>
+              {leftColumnMedia.map(renderMasonryItem)}
             </View>
-        </ScrollView>
-        <PhotoViewerModal media={selectedMedia} visible={!!selectedMedia} onClose={() => setSelectedMedia(null)} onDelete={deleteMedia} onUpload={handleUpload} />
-    </View>
+            <View style={styles.column}>
+              {rightColumnMedia.map(renderMasonryItem)}
+            </View>
+          </View>
+        )}
+      </ScrollView>
+      <PhotoViewerModal 
+        media={selectedMedia} 
+        visible={!!selectedMedia} 
+        onClose={() => setSelectedMedia(null)} 
+        onDelete={deleteMedia} 
+      />
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+    backgroundImage: {
+        flex: 1,
+    },
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 12,
         borderRadius: 12,
         width: width * 0.7,
-        height: 40
+        height: 40,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
     },
     searchInput: {
         flex: 1,
@@ -260,7 +238,31 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         borderRadius: 12,
         overflow: 'hidden',
-        backgroundColor: '#eee'
+        backgroundColor: 'rgba(238, 238, 238, 0.8)',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    emptyState: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 100,
+    },
+    emptyStateText: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: 'white',
+        marginTop: 16,
+        textAlign: 'center',
+    },
+    emptyStateSubtext: {
+        fontSize: 16,
+        color: 'rgba(255, 255, 255, 0.7)',
+        marginTop: 8,
+        textAlign: 'center',
     },
     viewerContainer: {
         flex: 1,
@@ -281,13 +283,17 @@ const styles = StyleSheet.create({
     viewerActions: {
         position: 'absolute',
         flexDirection: 'row',
-        justifyContent: 'space-around',
+        justifyContent: 'center',
         width: '100%',
         paddingHorizontal: 40,
     },
     actionButton: {
         alignItems: 'center',
         gap: 8,
+        backgroundColor: 'rgba(220, 38, 38, 0.8)',
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        borderRadius: 12,
     },
     actionText: {
         color: 'white',

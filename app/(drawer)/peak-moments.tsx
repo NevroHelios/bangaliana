@@ -8,7 +8,11 @@ import React, { useRef, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+<<<<<<< HEAD
+const BACKEND_URL = "http://192.168.244.255:10000";
+=======
 const BACKEND_URL = "http://192.168.233.236:10000";
+>>>>>>> 3f40e143093705ffc081f4146f6648d8fb03f8b1
 
 const PeakMomentsScreen = () => {
   const { token } = useAuth();
