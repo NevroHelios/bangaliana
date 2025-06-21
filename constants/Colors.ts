@@ -1,116 +1,118 @@
 export const Colors = {
   light: {
-    primary: "rgb(111, 75, 242)", // A vibrant, modern purple
+    primary: "rgb(0, 100, 200)", // A vibrant blue
     onPrimary: "rgb(255, 255, 255)",
-    primaryContainer: "rgb(234, 221, 255)",
-    onPrimaryContainer: "rgb(30, 0, 99)",
-    secondary: "rgb(105, 93, 119)", // A complementary muted purple/gray
+    primaryContainer: "rgb(200, 225, 255)",
+    onPrimaryContainer: "rgb(0, 30, 60)",
+    secondary: "rgb(80, 120, 150)", // A complementary muted blue/gray
     onSecondary: "rgb(255, 255, 255)",
-    secondaryContainer: "rgb(240, 221, 255)",
-    onSecondaryContainer: "rgb(32, 23, 42)",
-    tertiary: "rgb(132, 85, 105)", // A warm, rosy accent
+    secondaryContainer: "rgb(210, 230, 240)",
+    onSecondaryContainer: "rgb(10, 30, 45)",
+    tertiary: "rgb(0, 128, 128)", // Teal for accents
     onTertiary: "rgb(255, 255, 255)",
-    tertiaryContainer: "rgb(255, 218, 231)",
-    onTertiaryContainer: "rgb(48, 17, 33)",
-    error: "rgb(186, 26, 26)",
+    tertiaryContainer: "rgb(180, 230, 230)",
+    onTertiaryContainer: "rgb(0, 40, 40)",
+    error: "rgb(200, 0, 0)",
     onError: "rgb(255, 255, 255)",
-    errorContainer: "rgb(255, 218, 218)",
-    onErrorContainer: "rgb(65, 0, 2)",
-    background: "rgb(255, 251, 255)", // A very light, clean background
-    onBackground: "rgb(29, 27, 32)", // Dark text for readability
-    surface: "rgb(255, 251, 255)", // Same as background for a unified feel
-    onSurface: "rgb(29, 27, 32)",
-    surfaceVariant: "rgb(233, 224, 235)",
-    onSurfaceVariant: "rgb(74, 69, 79)", // For inactive/less important elements
-    outline: "rgb(124, 117, 129)",
-    outlineVariant: "rgb(204, 196, 207)",
+    errorContainer: "rgb(255, 200, 200)",
+    onErrorContainer: "rgb(60, 0, 0)",
+    background: "rgb(248, 249, 250)", // Off-white for a softer background
+    onBackground: "rgb(25, 25, 25)", // Dark gray for text
+    surface: "rgb(255, 255, 255)", // White for card backgrounds
+    onSurface: "rgb(25, 25, 25)",
+    surfaceVariant: "rgb(230, 235, 240)",
+    onSurfaceVariant: "rgb(60, 70, 80)", // Used for inactive icons
+    outline: "rgb(180, 190, 200)", // Lighter outline
+    outlineVariant: "rgb(200, 210, 220)",
     shadow: "rgb(0, 0, 0)",
     scrim: "rgb(0, 0, 0)",
-    inverseSurface: "rgb(50, 47, 54)",
-    inverseOnSurface: "rgb(245, 239, 246)",
-    inversePrimary: "rgb(209, 184, 255)",
+    inverseSurface: "rgb(40, 45, 50)",
+    inverseOnSurface: "rgb(240, 240, 240)",
+    inversePrimary: "rgb(150, 200, 255)",
     elevation: {
       level0: "transparent",
-      level1: "rgb(248, 242, 248)",
-      level2: "rgb(243, 237, 244)",
-      level3: "rgb(238, 232, 240)",
-      level4: "rgb(236, 230, 238)",
-      level5: "rgb(233, 226, 235)",
+      level1: "rgb(242, 245, 248)", // Subtle elevation steps
+      level2: "rgb(238, 242, 245)",
+      level3: "rgb(232, 238, 242)",
+      level4: "rgb(230, 236, 240)",
+      level5: "rgb(225, 232, 238)",
     },
-    surfaceDisabled: "rgba(29, 27, 32, 0.12)",
-    onSurfaceDisabled: "rgba(29, 27, 32, 0.38)",
-    backdrop: "rgba(50, 47, 54, 0.4)",
+    surfaceDisabled: "rgba(25, 25, 25, 0.12)",
+    onSurfaceDisabled: "rgba(25, 25, 25, 0.38)",
+    backdrop: "rgba(40, 45, 50, 0.4)",
 
-    // Glassmorphism
-    glassSurface: "rgba(255, 255, 255, 0.2)",
-    onGlassSurface: "rgb(29, 27, 32)",
-    glassOutline: "rgba(255, 255, 255, 0.3)",
+    // Enhanced Glassmorphism & Apple-like aesthetic additions
+    glassSurface: "rgba(255, 255, 255, 0.25)", // More transparent for better glass effect
+    onGlassSurface: "rgb(0, 0, 0)", // Black text on light glass
+    glassOutline: "rgba(255, 255, 255, 0.3)", // More subtle outline
+    inputBackgroundGlass: "rgba(255, 255, 255, 0.2)", // More transparent for inputs
+    inputBorderGlass: "rgba(200, 200, 200, 0.4)", // Softer border for inputs on glass
+    placeholderGlass: "rgba(0, 0, 0, 0.4)", // Placeholder text on light glass inputs
 
-    inputBackgroundGlass: "rgba(255, 255, 255, 0.2)",
-    inputBorderGlass: "rgba(204, 196, 207, 0.5)",
-    placeholderGlass: "rgba(74, 69, 79, 0.5)",
-    glassHeader: "rgba(255, 251, 255, 0.8)",
-    glassTabBar: "rgba(255, 251, 255, 0.6)",
-    rainGlass: "rgba(255, 255, 255, 0.1)",
+    // New glass colors for enhanced effects
+    glassHeader: "rgba(242, 242, 247, 0.65)", // Apple-like light vibrant blur, increased transparency
+    glassTabBar: "rgba(255, 255, 255, 0.15)", // More transparent for liquid effect
+    rainGlass: "rgba(255, 255, 255, 0.1)", // Rain-like effect
 
-    activeTabIcon: "rgb(111, 75, 242)",
-    inactiveTabIcon: "rgb(74, 69, 79)",
+    activeTabIcon: "rgb(0, 100, 200)", // Same as primary
+    inactiveTabIcon: "rgb(142, 142, 147)", // Apple's gray for inactive icons
   },
   dark: {
-    primary: "rgb(209, 184, 255)", // A lighter, vibrant purple for dark mode
-    onPrimary: "rgb(61, 21, 146)",
-    primaryContainer: "rgb(85, 49, 172)",
-    onPrimaryContainer: "rgb(234, 221, 255)",
-    secondary: "rgb(207, 195, 216)", // Lighter muted purple/gray
-    onSecondary: "rgb(55, 45, 65)",
-    secondaryContainer: "rgb(79, 68, 89)",
-    onSecondaryContainer: "rgb(240, 221, 255)",
-    tertiary: "rgb(243, 183, 204)", // Lighter rosy accent
-    onTertiary: "rgb(71, 38, 55)",
-    tertiaryContainer: "rgb(101, 60, 79)",
-    onTertiaryContainer: "rgb(255, 218, 231)",
-    error: "rgb(255, 180, 171)",
-    onError: "rgb(105, 0, 5)",
-    errorContainer: "rgb(147, 0, 13)",
-    onErrorContainer: "rgb(255, 218, 210)",
-    background: "rgb(20, 18, 20)", // Deep, dark background
-    onBackground: "rgb(231, 225, 230)", // Light text for readability
-    surface: "rgb(20, 18, 20)", // Same as background
-    onSurface: "rgb(231, 225, 230)",
-    surfaceVariant: "rgb(74, 69, 79)",
-    onSurfaceVariant: "rgb(204, 196, 207)", // For inactive/less important elements
-    outline: "rgb(150, 142, 153)",
-    outlineVariant: "rgb(74, 69, 79)",
+    primary: "rgb(18, 18, 19)", // Lighter blue for dark mode
+    onPrimary: "rgb(0, 40, 80)",
+    primaryContainer: "rgb(4, 10, 16)",
+    onPrimaryContainer: "rgb(200, 225, 255)",
+    secondary: "rgb(160, 190, 210)", // Lighter muted blue/gray
+    onSecondary: "rgb(20, 40, 55)",
+    secondaryContainer: "rgb(50, 80, 100)",
+    onSecondaryContainer: "rgb(210, 230, 240)",
+    tertiary: "rgb(100, 200, 200)", // Lighter teal
+    onTertiary: "rgb(0, 50, 50)",
+    tertiaryContainer: "rgb(0, 80, 80)",
+    onTertiaryContainer: "rgb(180, 230, 230)",
+    error: "rgb(255, 150, 150)",
+    onError: "rgb(80, 0, 0)",
+    errorContainer: "rgb(120, 0, 0)",
+    onErrorContainer: "rgb(255, 200, 200)",
+    background: "rgb(18, 18, 18)", // Very dark gray, almost black
+    onBackground: "rgb(225, 225, 225)", // Light gray for text
+    surface: "rgb(30, 30, 30)", // Dark gray for card backgrounds
+    onSurface: "rgb(225, 225, 225)",
+    surfaceVariant: "rgb(50, 55, 60)",
+    onSurfaceVariant: "rgb(190, 195, 200)", // Used for inactive icons
+    outline: "rgb(100, 110, 120)", // Darker outline
+    outlineVariant: "rgb(60, 70, 80)",
     shadow: "rgb(0, 0, 0)",
     scrim: "rgb(0, 0, 0)",
-    inverseSurface: "rgb(231, 225, 230)",
-    inverseOnSurface: "rgb(50, 47, 54)",
-    inversePrimary: "rgb(111, 75, 242)",
+    inverseSurface: "rgb(225, 225, 230)",
+    inverseOnSurface: "rgb(40, 40, 45)",
+    inversePrimary: "rgb(0, 100, 200)",
     elevation: {
       level0: "transparent",
-      level1: "rgb(28, 24, 28)",
-      level2: "rgb(33, 28, 33)",
-      level3: "rgb(38, 33, 38)",
-      level4: "rgb(40, 35, 40)",
-      level5: "rgb(44, 39, 44)",
+      level1: "rgb(33, 33, 33)", // Subtle elevation steps for dark mode
+      level2: "rgb(38, 38, 38)",
+      level3: "rgb(43, 43, 43)",
+      level4: "rgb(45, 45, 45)",
+      level5: "rgb(50, 50, 50)",
     },
-    surfaceDisabled: "rgba(231, 225, 230, 0.12)",
-    onSurfaceDisabled: "rgba(231, 225, 230, 0.38)",
-    backdrop: "rgba(50, 47, 54, 0.4)",
+    surfaceDisabled: "rgba(225, 225, 225, 0.12)",
+    onSurfaceDisabled: "rgba(225, 225, 225, 0.38)",
+    backdrop: "rgba(20, 20, 20, 0.4)",
 
-    // Glassmorphism
-    glassSurface: "rgba(30, 30, 30, 0.2)",
-    onGlassSurface: "rgb(231, 225, 230)",
-    glassOutline: "rgba(70, 70, 70, 0.4)",
+    // Enhanced Glassmorphism & Apple-like aesthetic additions
+    glassSurface: "rgba(30, 30, 30, 0.25)", // More transparent for better glass effect
+    onGlassSurface: "rgb(255, 255, 255)", // White text on dark glass
+    glassOutline: "rgba(70, 70, 70, 0.4)", // More subtle outline
+    inputBackgroundGlass: "rgba(50, 50, 50, 0.3)", // More transparent for inputs on dark glass
+    inputBorderGlass: "rgba(100, 100, 100, 0.4)", // Softer border for inputs on dark glass
+    placeholderGlass: "rgba(255, 255, 255, 0.4)", // Placeholder text on dark glass inputs
 
-    inputBackgroundGlass: "rgba(50, 47, 54, 0.3)",
-    inputBorderGlass: "rgba(74, 69, 79, 0.5)",
-    placeholderGlass: "rgba(204, 196, 207, 0.5)",
-    glassHeader: "rgba(20, 18, 20, 0.8)",
-    glassTabBar: "rgba(20, 18, 20, 0.6)",
-    rainGlass: "rgba(255, 255, 255, 0.05)",
+    // New glass colors for enhanced effects
+    glassHeader: "rgba(28, 28, 30, 0.8)", // Apple-like dark vibrant blur
+    glassTabBar: "rgba(20, 20, 20, 0.2)", // More transparent for liquid effect
+    rainGlass: "rgba(255, 255, 255, 0.05)", // Rain-like effect
 
-    activeTabIcon: "rgb(209, 184, 255)",
-    inactiveTabIcon: "rgb(150, 142, 153)",
+    activeTabIcon: "rgb(130, 190, 255)", // Same as primary
+    inactiveTabIcon: "rgb(142, 142, 147)", // Apple's gray for inactive icons, or use onSurfaceVariant
   },
 };

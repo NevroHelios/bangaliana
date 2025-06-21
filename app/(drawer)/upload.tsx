@@ -7,6 +7,7 @@ import { useHeaderHeight } from '@react-navigation/elements';
 import { ResizeMode, Video } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
+import * as FileSystem from 'expo-file-system';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -293,27 +294,30 @@ const MediaPostCreator = () => {
     try {
       console.log('[DEBUG] Preparing to append media files:', selectedMedia);
       // Append media files
-      selectedMedia.forEach((media, idx) => {
+      for (let idx = 0; idx < selectedMedia.length; idx++) {
+        const media = selectedMedia[idx];
         let mimeType = 'image/jpeg';
-        if (media.type === 'video') mimeType = 'video/mp4';
-        else if (media.type === 'image') mimeType = 'image/jpeg';
-
-        if (!media.uri || typeof media.uri !== 'string') {
-          throw new Error(`[Media Error] Invalid URI for media at index ${idx}`);
+        let ext = 'jpg';
+        if (media.type === 'video') {
+          mimeType = 'video/mp4';
+          ext = 'mp4';
+        } else if (media.type === 'image') {
+          mimeType = 'image/jpeg';
+          ext = 'jpg';
         }
-        if (!media.type) {
-          throw new Error(`[Media Error] Missing type for media at index ${idx}`);
+        let fileUri = media.uri;
+        // If file is from camera and is file://, copy to cache dir to ensure accessibility
+        if (fileUri.startsWith('file://')) {
+          const destPath = `${FileSystem.cacheDirectory}upload_${Date.now()}_${idx}.${ext}`;
+          await FileSystem.copyAsync({ from: fileUri, to: destPath });
+          fileUri = destPath;
         }
-        if (!media.fileName) {
-          console.warn(`[Media Warning] Missing fileName for media at index ${idx}, using fallback.`);
-        }
-
         formData.append('media', {
-          uri: media.uri,
-          name: media.fileName || `media_${idx}.${media.type === 'video' ? 'mp4' : 'jpg'}`,
+          uri: fileUri,
+          name: media.fileName || `media_${idx}.${ext}`,
           type: mimeType,
         } as any);
-      });
+      }
 
       // Append other fields
       formData.append('userId', user.id); // Always use user.id

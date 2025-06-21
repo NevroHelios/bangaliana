@@ -212,7 +212,17 @@ export default function PhotosScreen() {
     });
   }, [navigation, searchQuery, onSurfaceColor, surfaceVariantColor, onSurfaceVariantColor, primaryColor]);
 
-  const filteredMedia = media.filter(item => item.id.includes(searchQuery.toLowerCase()));
+  const filteredMedia = media.filter(item => {
+    if (searchQuery.trim() === '') {
+        return true;
+    }
+    // FIX: Search by a user-friendly value like the date instead of the internal ID.
+    // This allows searching for things like "7/25/2023" or "2023".
+    // You could expand this to search other fields like a caption or comments.
+    const itemDate = new Date(item.timestamp).toLocaleDateString().toLowerCase();
+    return itemDate.includes(searchQuery.toLowerCase());
+  });
+
   const leftColumnMedia = filteredMedia.filter((_, index) => index % 2 === 0);
   const rightColumnMedia = filteredMedia.filter((_, index) => index % 2 === 1);
 

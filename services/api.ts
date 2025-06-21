@@ -1,7 +1,7 @@
 import { MediaItem } from '@/types/index'; // Assuming types are centralized
 import * as FileSystem from 'expo-file-system';
 
-const API_BASE_URL = 'http://localhost:5000'; // Replace with your actual backend URL
+const API_BASE_URL = 'http://192.168.47.91:10000'; // Replace with your actual backend URL
 
 const FAS_FAST_URL = "https://testing-80wh.onrender.com" // for fast api testing
 
