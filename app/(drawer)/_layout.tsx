@@ -237,6 +237,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   avatar: {
+    backgroundColor: "white",
     width: 60,
     height: 60,
     borderRadius: 30,

@@ -17,7 +17,7 @@ import {
     View
 } from 'react-native';
 
-const BACKEND_URL = "http://192.168.233.236:10000"!;
+const BACKEND_URL = "http://192.168.244.255:10000";
 
 const LensScreen = () => {
     const { token } = useAuth();
