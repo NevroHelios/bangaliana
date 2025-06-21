@@ -338,11 +338,7 @@ const MediaPostCreator = () => {
         console.log(`[DEBUG] FormData field: ${pair[0]} =`, pair[1]);
       }
 
-<<<<<<< HEAD
       const apiUrl = `http://192.168.244.255:10000/api/posts/createpost`;
-=======
-      const apiUrl = `http://192.168.233.236:10000/api/posts/createpost`;
->>>>>>> 3f40e143093705ffc081f4146f6648d8fb03f8b1
       console.log('[DEBUG] Sending POST request to', apiUrl);
 
       const response = await fetch(apiUrl, {
@@ -585,25 +581,7 @@ const MediaPostCreator = () => {
           />
         </View>
 
-<<<<<<< HEAD
         
-=======
-        <View style={styles.inputGroup}>
-          <ThemedText type="defaultSemiBold" style={styles.label}>Location</ThemedText>
-          <ThemedView style={styles.locationContainer}>
-            {isFetchingLocation ? (
-              <ActivityIndicator size="small" color={primaryColor as string} />
-            ) : postData.location ? (
-              <ThemedText style={styles.locationTextDisplay}>{postData.location.name}</ThemedText>
-            ) : (
-              <ThemedText style={styles.locationTextDisplay}>Location not available</ThemedText>
-            )}
-            <TouchableOpacity onPress={fetchUserLocation} disabled={isFetchingLocation}>
-              <Ionicons name="refresh-circle" size={24} color={isFetchingLocation ? onSurfaceVariantColor as string : primaryColor as string} />
-            </TouchableOpacity>
-          </ThemedView>
-        </View>
->>>>>>> 3f40e143093705ffc081f4146f6648d8fb03f8b1
 
         <View style={styles.inputGroup}>
           <ThemedText type="defaultSemiBold" style={styles.label}>Visibility</ThemedText>
@@ -1042,11 +1020,7 @@ const styles = StyleSheet.create({
   nextStepButton: {
     alignItems: 'center',
     justifyContent: 'center',
-<<<<<<< HEAD
     paddingVertical: 50,
-=======
-    paddingVertical: 12,
->>>>>>> 3f40e143093705ffc081f4146f6648d8fb03f8b1
     paddingHorizontal: 16,
     borderRadius: 12,
     marginTop: 16,
