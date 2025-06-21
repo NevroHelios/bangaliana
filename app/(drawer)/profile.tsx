@@ -1,12 +1,13 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useAuth } from '@/context/AuthContext';
+import { useColorScheme, useThemeActions } from '@/hooks/useColorScheme';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { Ionicons } from '@expo/vector-icons';
 import { useHeaderHeight } from '@react-navigation/elements';
 import * as Haptics from 'expo-haptics';
 import React from 'react';
-import { Dimensions, FlatList, Image, Pressable, StyleSheet, View } from 'react-native';
+import { Dimensions, FlatList, Image, Pressable, StyleSheet, View, Switch } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -30,6 +31,8 @@ const ProfileHeader = () => {
     const onSurfaceColor = useThemeColor({}, 'onSurface');
     const onSurfaceVariantColor = useThemeColor({}, 'onSurfaceVariant');
     const primaryColor = useThemeColor({}, 'primary');
+    const theme = useColorScheme();
+    const { toggleTheme } = useThemeActions();
 
     return (
         <ThemedView style={{ backgroundColor: surfaceColor as string, paddingBottom: 20 }}>
@@ -64,6 +67,13 @@ const ProfileHeader = () => {
                  <Pressable style={[styles.profileButton, {backgroundColor: useThemeColor({}, 'surfaceVariant') as string}]}>
                     <ThemedText style={{color: onSurfaceColor as string, fontWeight: '600'}}>Share Profile</ThemedText>
                 </Pressable>
+            </View>
+            <View style={styles.themeSwitchContainer}>
+                <ThemedText>Dark Mode</ThemedText>
+                <Switch
+                    value={theme === 'dark'}
+                    onValueChange={toggleTheme}
+                />
             </View>
         </ThemedView>
     );
@@ -193,5 +203,12 @@ const styles = StyleSheet.create({
         flex: 1,
         width: '100%',
         height: '100%',
+    },
+    themeSwitchContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        marginTop: 20,
     },
 });

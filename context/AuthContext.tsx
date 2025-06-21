@@ -2,12 +2,9 @@ import { User } from '@/types';
 import * as SecureStore from 'expo-secure-store';
 import React, { createContext, ReactNode, useContext, useState } from 'react';
 import { Alert } from 'react-native';
+import { API_BASE_URL } from '@/config/config';
 
-<<<<<<< HEAD
-const BACKEND_URL = "http://192.168.244.255:10000";// Fallback for local development
-=======
-const BACKEND_URL = "http://192.168.233.236:10000";// Fallback for local development
->>>>>>> 3f40e143093705ffc081f4146f6648d8fb03f8b1
+const BACKEND_URL = "http://192.168.174.91:10000";
 const TOKEN_KEY = 'jwt-token';
 
 interface AuthContextType {
@@ -67,6 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []); */
 
   const login = async (email: string, password: string) => {
+    console.log('Attempting to log in with email:', email);
     try {
       const response = await fetch(`${BACKEND_URL}/auth/login`, {
         method: 'POST',
@@ -75,6 +73,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       const data = await response.json();
+      console.log('Login response status:', response.status);
+      console.log('Login response data:', data);
 
       if (response.ok) {
         setToken(data.token);
@@ -94,14 +94,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const register = async (name: string, email: string, password: string) => {
+    console.log('Attempting to register with:', { name, email });
     try {
       const response = await fetch(`${BACKEND_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: name, email, password }),
+        body: JSON.stringify({ name, email, password }),
       });
 
       const data = await response.json();
+      console.log('Register response status:', response.status);
+      console.log('Register response data:', data);
 
       if (response.ok && data.success) {
         return data.message;
