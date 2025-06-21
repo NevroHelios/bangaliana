@@ -5,19 +5,19 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    FlatList,
-    Image,
-    ImageBackground,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  FlatList,
+  Image,
+  ImageBackground,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -287,13 +287,9 @@ const MediaPostCreator = () => {
       }
 
       // Debug: log all FormData keys
-      if (typeof formData.getParts === 'function') {
-        // For React Native FormData polyfill
-        // @ts-ignore
-        const parts = formData.getParts();
-        console.log('[DEBUG] FormData parts:', parts);
-      } else {
-        // Browser FormData
+      // Note: FormData does not have getParts; use entries() for debugging
+      // @ts-ignore
+      if (typeof formData.entries === 'function') {
         // @ts-ignore
         for (let pair of formData.entries()) {
           console.log(`[DEBUG] FormData field: ${pair[0]} =`, pair[1]);

@@ -2,12 +2,20 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Animated, Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const intervalRef = useRef<number | null>(null);
+  const slideAnim = useRef(new Animated.Value(0)).current;
+  
+  const featuredAnim = useRef(new Animated.Value(0)).current;
+  const popularAnim = useRef(new Animated.Value(0)).current;
+  const featured2Anim = useRef(new Animated.Value(0)).current;
 
   const collageImages = [
     {
@@ -40,7 +48,7 @@ export default function HomeScreen() {
       source: require("@/assets/images/kolkata.jpg"),
       color: "rgba(51, 187, 255, 0.8)",
     },
-     {
+    {
       id: 7,
       source: require("@/assets/images/kolkata.jpg"),
       color: "rgba(255, 87, 51, 0.8)",
@@ -71,6 +79,73 @@ export default function HomeScreen() {
       color: "rgba(51, 187, 255, 0.8)",
     },
   ];
+
+  const slideToNext = () => {
+    const nextIndex = currentImageIndex + 1;
+    
+    if (nextIndex >= collageImages.length) {
+      // At the last image, slide to the duplicate first image
+      Animated.timing(slideAnim, {
+        toValue: -nextIndex * width,
+        duration: 600,
+        useNativeDriver: true,
+      }).start(() => {
+        // After animation, instantly jump to the real first image
+        slideAnim.setValue(0);
+        setCurrentImageIndex(0);
+      });
+    } else {
+      // Normal slide
+      Animated.timing(slideAnim, {
+        toValue: -nextIndex * width,
+        duration: 600,
+        useNativeDriver: true,
+      }).start();
+      setCurrentImageIndex(nextIndex);
+    }
+  };
+
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      slideToNext();
+    }, 4000);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [currentImageIndex]);
+
+  // Trigger animations when component mounts
+  useEffect(() => {
+    const animateSequence = () => {
+      // Stagger the animations for a smooth entrance effect
+      Animated.sequence([
+        Animated.timing(featuredAnim, {
+          toValue: 1,
+          duration: 800,
+          delay: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(popularAnim, {
+          toValue: 1,
+          duration: 800,
+          delay: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(featured2Anim, {
+          toValue: 1,
+          duration: 800,
+          delay: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    };
+
+    // Start animations after a short delay
+    setTimeout(animateSequence, 500);
+  }, []);
 
   const createCollageItems = () => {
     const items = [];
@@ -107,19 +182,19 @@ export default function HomeScreen() {
 
   const collageItems = createCollageItems();
 
-  const CollageBackground = () => (
-    <View style={styles.collageContainer}>
-      {collageItems.map((item) => (
-        <View key={item.id} style={{ backgroundColor: item.color }}>
-          <Image
-            source={item.source}
-            style={styles.collageImage}
-            contentFit="cover"
-          />
-          <View
-            style={[styles.colorOverlay, { backgroundColor: item.color }]}
-          />
-        </View>
+  const renderCarouselDots = () => (
+    <View style={styles.dotsContainer}>
+      {collageImages.map((_, index) => (
+        <View
+          key={index}
+          style={[
+            styles.dot,
+            {
+              backgroundColor: index === currentImageIndex % collageImages.length ? 'white' : 'rgba(255, 255, 255, 0.4)',
+              transform: [{ scale: index === currentImageIndex % collageImages.length ? 1.2 : 1 }],
+            }
+          ]}
+        />
       ))}
     </View>
   );
@@ -129,11 +204,48 @@ export default function HomeScreen() {
       headerBackgroundColor={{ light: "black", dark: "black" }}
       headerImage={
         <View style={styles.headerContainer}>
-          <Image
-            source={require("@/assets/images/kolkata.jpg")}
-            style={styles.mainImage}
-            contentFit="cover"
-          />
+          {/* Carousel Container */}
+          <View style={styles.carouselContainer}>
+            <Animated.View
+              style={[
+                styles.carouselSlider,
+                {
+                  transform: [{ translateX: slideAnim }],
+                  width: width * (collageImages.length + 1), // +1 for duplicate first image
+                }
+              ]}
+            >
+              {collageImages.map((image, index) => (
+                <View key={image.id} style={styles.slideContainer}>
+                  <Image
+                    source={image.source}
+                    style={styles.mainImage}
+                    contentFit="cover"
+                  />
+                  <View
+                    style={[
+                      styles.slideOverlay,
+                      { backgroundColor: image.color }
+                    ]}
+                  />
+                </View>
+              ))}
+              {/* Duplicate first image for seamless loop */}
+              <View key="duplicate-first" style={styles.slideContainer}>
+                <Image
+                  source={collageImages[0].source}
+                  style={styles.mainImage}
+                  contentFit="cover"
+                />
+                <View
+                  style={[
+                    styles.slideOverlay,
+                    { backgroundColor: collageImages[0].color }
+                  ]}
+                />
+              </View>
+            </Animated.View>
+          </View>
 
           <LinearGradient
             colors={["transparent", "rgba(0,0,0,0.3)", "rgba(0,0,0,0.8)"]}
@@ -147,7 +259,23 @@ export default function HomeScreen() {
       }
     >
       <ScrollView style={styles.contentContainer}>
-        <View style={styles.sectionContainer}>
+        {/* First Featured Collections Section */}
+        <Animated.View 
+          style={[
+            styles.sectionContainer,
+            {
+              opacity: featuredAnim,
+              transform: [
+                {
+                  translateY: featuredAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [50, 0],
+                  }),
+                },
+              ],
+            }
+          ]}
+        >
           <Text style={styles.sectionTitle}>Featured Collections</Text>
           <ScrollView
             horizontal
@@ -164,14 +292,30 @@ export default function HomeScreen() {
                   style={styles.featureImage}
                   contentFit="cover"
                 />
-              
               </View>
             ))}
           </ScrollView>
-        </View>
+        </Animated.View>
 
-        <View style={styles.sectionContainer}>
+        {/* Popular Collections Section */}
+        <Animated.View 
+          style={[
+            styles.sectionContainerL, // Using sectionContainerL for larger bottom margin
+            {
+              opacity: popularAnim,
+              transform: [
+                {
+                  translateY: popularAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [50, 0],
+                  }),
+                },
+              ],
+            }
+          ]}
+        >
           <Text style={styles.sectionTitle}>Popular Collections</Text>
+          {/* Standard Instagram Grid */}
           <View style={styles.instagramGrid}>
             <View style={styles.leftGrid}>
               {collageImages.slice(0, 4).map((item, index) => (
@@ -181,34 +325,6 @@ export default function HomeScreen() {
                     style={styles.gridImage}
                     contentFit="cover"
                   />
-                 
-                </View>
-              ))}
-            </View>
-            {collageImages.length > 4 && (
-              <View style={styles.largeGridItem}>
-                <Image
-                  source={collageImages[4].source}
-                  style={styles.gridImage}
-                  contentFit="cover"
-                />
-                
-              </View>
-            )}
-            
-          </View>
-        </View>
-        <View style={styles.sectionContainerL}>
-          <View style={styles.instagramGrid}>
-            <View style={styles.leftGrid}>
-              {collageImages.slice(0, 4).map((item, index) => (
-                <View key={`left-${item.id}`} style={styles.smallGridItem}>
-                  <Image
-                    source={item.source}
-                    style={styles.gridImage}
-                    contentFit="cover"
-                  />
-                 
                 </View>
               ))}
             </View>
@@ -222,7 +338,69 @@ export default function HomeScreen() {
               </View>
             )}
           </View>
-        </View>
+
+          {/* Reverse Instagram Grid (formerly Heritage Gallery) */}
+          <View style={styles.reverseInstagramGrid}>
+            <View style={styles.rightGrid}>
+              {collageImages.slice(6, 10).map((item) => (
+                <View key={`heritage-${item.id}`} style={styles.smallGridItem}>
+                  <Image
+                    source={item.source}
+                    style={styles.gridImage}
+                    contentFit="cover"
+                  />
+                </View>
+              ))}
+            </View>
+            {collageImages.length > 10 && (
+              <View style={styles.reverseLargeGridItem}>
+                <Image
+                  source={collageImages[10].source}
+                  style={styles.gridImage}
+                  contentFit="cover"
+                />
+              </View>
+            )}
+          </View>
+        </Animated.View>
+
+        {/* Second Featured Collections Section */}
+        <Animated.View 
+          style={[
+            styles.sectionContainer,
+            {
+              opacity: featured2Anim,
+              transform: [
+                {
+                  translateY: featured2Anim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [50, 0],
+                  }),
+                },
+              ],
+            }
+          ]}
+        >
+          <Text style={styles.sectionTitle}>Trending Collections</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.horizontalScroll}
+          >
+            {collageImages.slice().reverse().map((item, index) => (
+              <View
+                key={`trending-${item.id}`}
+                style={[styles.featureBox, { backgroundColor: item.color }]}
+              >
+                <Image
+                  source={item.source}
+                  style={styles.featureImage}
+                  contentFit="cover"
+                />
+              </View>
+            ))}
+          </ScrollView>
+        </Animated.View>
       </ScrollView>
     </ParallaxScrollView>
   );
@@ -233,34 +411,35 @@ const styles = StyleSheet.create({
     width: "100%",
     height: height * 0.5,
     position: "relative",
+    overflow: "hidden",
   },
-  mainImage: {
+  carouselContainer: {
     width: "100%",
     height: "100%",
     position: "absolute",
     top: 0,
     left: 0,
-    opacity: 3,
-    zIndex: 0,
   },
-  collageContainer: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    opacity: 0.4,
-    zIndex: 1,
-  },
-  collageImage: {
-    width: "100%",
+  carouselSlider: {
+    flexDirection: "row",
     height: "100%",
   },
-  colorOverlay: {
+  slideContainer: {
+    width: width,
+    height: "100%",
+    position: "relative",
+  },
+  mainImage: {
+    width: "100%",
+    height: "100%",
+  },
+  slideOverlay: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    opacity: 0.3,
+    opacity: 0.1,
   },
   gradientOverlay: {
     position: "absolute",
@@ -288,21 +467,39 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 4,
   },
+  dotsContainer: {
+    position: "absolute",
+    bottom: 30,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 4,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
+  },
   contentContainer: {
     flex: 1,
   },
   sectionContainer: {
-    marginVertical: 0,
+    marginVertical: 20,
   },
   sectionContainerL: {
-    marginVertical: 0,
+    marginVertical: 20,
+    marginBottom: 40,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
     color: "white",
     marginVertical: 20,
     textAlign: "center",
+    letterSpacing: 0.5,
   },
   horizontalScroll: {
     paddingLeft: 20,
@@ -310,35 +507,42 @@ const styles = StyleSheet.create({
   featureBox: {
     width: 200,
     height: 120,
-    borderRadius: 8,
+    borderRadius: 12,
     marginRight: 15,
     overflow: "hidden",
     position: "relative",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   featureImage: {
     width: "100%",
     height: "100%",
     opacity: 0.7,
   },
-  featureOverlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    padding: 10,
-  },
-  featureText: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "600",
-  },
   instagramGrid: {
     flexDirection: "row",
     marginHorizontal: 15,
-    height: 250, 
+    height: 250,
+  },
+  reverseInstagramGrid: {
+    flexDirection: 'row-reverse', // Key change for reverse layout
+    marginHorizontal: 15,
+    height: 250,
+    marginTop: 8, // Adds a small gap between the two grids
   },
   leftGrid: {
+    flex: 2,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    height: "100%",
+  },
+  rightGrid: { // Essentially the same as leftGrid, just for clarity
     flex: 2,
     flexDirection: "row",
     flexWrap: "wrap",
@@ -347,33 +551,24 @@ const styles = StyleSheet.create({
   smallGridItem: {
     width: "50%",
     height: "50%",
-    padding: 1,
+    padding: 4, 
     position: "relative",
   },
   largeGridItem: {
     flex: 1,
-    paddingLeft: 1,
+    paddingLeft: 4, 
+    height: "100%",
+    position: "relative",
+  },
+  reverseLargeGridItem: { // For the reversed layout
+    flex: 1,
+    paddingRight: 4, // Padding on the opposite side
     height: "100%",
     position: "relative",
   },
   gridImage: {
     width: "100%",
     height: "100%",
-    borderRadius: 4,
-  },
-  imageOverlay: {
-    position: "absolute",
-    bottom: 1,
-    left: 1,
-    right: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    padding: 5,
-    borderBottomLeftRadius: 4,
-    borderBottomRightRadius: 4,
-  },
-  gridText: {
-    color: "white",
-    fontSize: 12,
-    fontWeight: "600",
+    borderRadius: 8,
   },
 });
