@@ -26,6 +26,11 @@ const MAPPING = {
   'person.crop.circle.fill': 'account-circle', // For Profile tab
   'rectangle.portrait.and.arrow.right': 'logout', // For Logout button
   'mic.fill': 'mic', // Added for voice chat mic icon
+  'play.circle.fill': 'play-circle-filled',
+  'pause.circle.fill': 'pause-circle-filled',
+  'hand.thumbsup.fill': 'thumb-up',
+  'hand.thumbsdown.fill': 'thumb-down',
+  'arrow.up': 'arrow-upward',
 } as IconMapping;
 
 /**
