@@ -17,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { Comment } from "@/types";
 import { useRouter } from "expo-router";
+import PostDetailModal from "@/components/PostDetailModal";
 
 interface MediaItem {
   _id: string;
@@ -91,13 +92,6 @@ export const PostCard = ({
   }, [item.likes, user]);
 
   const handleLike = async () => {
-    const originalLiked = isLiked;
-    const originalLikeCount = likeCount;
-
-    // Optimistic update
-    setIsLiked(!originalLiked);
-    setLikeCount(originalLiked ? originalLikeCount - 1 : originalLikeCount + 1);
-
     try {
       const res = await fetch(
         `http://192.168.233.236:10000/api/posts/${item._id}/like`,
@@ -117,9 +111,6 @@ export const PostCard = ({
       onLike(item._id, data.likes);
     } catch (error) {
       console.error("Failed to like post:", error);
-      // Revert on error
-      setIsLiked(originalLiked);
-      setLikeCount(originalLikeCount);
     }
   };
 
@@ -243,6 +234,7 @@ export const PostCard = ({
               );
               setCurrentImage(index);
             }}
+            style={styles.avatar}
           />
           {item.mediaItems.length > 1 && (
             <View style={styles.pagination}>
@@ -262,6 +254,7 @@ export const PostCard = ({
               ))}
             </View>
           )}
+          <Text style={[styles.date, { color: mutedColor }]}>{new Date(item.createdAt).toLocaleDateString()}</Text>
         </View>
       )}
 
@@ -839,6 +832,10 @@ const Feed = () => {
         post._id === postId ? { ...post, comments: newComments } : post
       )
     );
+  };
+
+  const handlePostPress = (post: Post) => {
+    setSelectedPost(post);
   };
 
   useEffect(() => {
