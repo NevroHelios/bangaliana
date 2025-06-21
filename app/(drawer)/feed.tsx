@@ -1,25 +1,55 @@
-// app/(tabs)/feed.tsx
+// app/(drawer)/feed.tsx
 import React, { useEffect, useState, useCallback } from "react";
-import { View, FlatList, ActivityIndicator, Text, StyleSheet, Dimensions } from "react-native";
+import { View, FlatList, ActivityIndicator, Text, StyleSheet, Dimensions, RefreshControl } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { Post, Comment } from "@/types"; // Make sure your types are correctly imported
+import { Post, Comment } from "@/types";
 import PostDetailModal from "@/components/PostDetailModal";
-import { PostCard } from "@/components/feed/PostCard"; // Import the new PostCard
-// import RecommendationsModal from "@/components/RecommendationsModal";
+import { PostCard } from "@/components/feed/PostCard";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 
 const Feed = () => {
   const { token } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [recommendationsVisible, setRecommendationsVisible] = useState(false);
-  const [similarPosts, setSimilarPosts] = useState<Post[]>([]);
-  const bgColor = useThemeColor({}, "background");
-  const primaryColor = useThemeColor({}, "primary");
-  const textColor = useThemeColor({}, "onSurface");
+
+  const bgColor = useThemeColor({}, "background") as string;
+  const primaryColor = useThemeColor({}, "primary") as string;
+  const textColor = useThemeColor({}, "onSurface") as string;
+
+  const fetchPosts = useCallback(async () => {
+    if (!token) return;
+    setError(null);
+    try {
+      const res = await fetch(`http://192.168.174.91:10000/api/posts?limit=100&populate=userId`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const errorData = await res.text();
+        throw new Error(`Failed to fetch posts: ${res.status} ${errorData}`);
+      }
+      const data = await res.json();
+      setPosts(data.posts || data);
+    } catch (err: any) {
+      setError(err.message || "Unknown error");
+    }
+  }, [token]);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchPosts().finally(() => setLoading(false));
+  }, [fetchPosts]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchPosts();
+    setRefreshing(false);
+  }, [fetchPosts]);
 
   const handleLikeUpdate = useCallback((postId: string, newLikes: string[]) => {
     setPosts(prevPosts =>
@@ -39,31 +69,14 @@ const Feed = () => {
 
   const handlePostPress = (post: Post) => {
     setSelectedPost(post);
+    setModalVisible(true);
   };
 
-  useEffect(() => {
-    if (!token) return;
-    const fetchPosts = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch(`http://192.168.174.91:10000/api/posts?limit=100&populate=userId`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) {
-          const errorData = await res.text();
-          throw new Error(`Failed to fetch posts: ${res.status} ${errorData}`);
-        }
-        const data = await res.json();
-        setPosts(data.posts || data);
-      } catch (err: any) {
-        setError(err.message || "Unknown error");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPosts();
-  }, [token]);
+  const renderHeader = () => (
+    <ThemedView style={styles.header}>
+      <ThemedText type="title">Feed</ThemedText>
+    </ThemedView>
+  );
 
   if (loading) {
     return (
@@ -76,7 +89,7 @@ const Feed = () => {
   if (error) {
     return (
       <View style={[styles.centerContainer, { backgroundColor: bgColor }]}>
-        <Text style={styles.errorText}>{error}</Text>
+        <ThemedText style={styles.errorText}>{error}</ThemedText>
       </View>
     );
   }
@@ -95,6 +108,7 @@ const Feed = () => {
         )}
         keyExtractor={(item) => item._id}
         contentContainerStyle={{ backgroundColor: bgColor, paddingTop: 10 }}
+        ListHeaderComponent={renderHeader}
         ListEmptyComponent={
           <View style={styles.centerContainer}>
             <Text style={[styles.emptyText, { color: textColor }]}>
@@ -102,23 +116,15 @@ const Feed = () => {
             </Text>
           </View>
         }
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[primaryColor]} tintColor={primaryColor} />
+        }
       />
       <PostDetailModal
         post={selectedPost}
-        visible={modalVisible}
+        isVisible={modalVisible}
         onClose={() => setModalVisible(false)}
-        onShowRecommendations={() => {
-          if (selectedPost) {
-            fetchSimilarPosts(selectedPost._id);
-            setRecommendationsVisible(true);
-          }
-        }}
       />
-      {/* <RecommendationsModal
-        visible={recommendationsVisible}
-        onClose={() => setRecommendationsVisible(false)}
-        posts={similarPosts}
-      /> */}
     </>
   );
 };
@@ -129,6 +135,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     height: Dimensions.get('window').height * 0.8,
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
   },
   errorText: {
     color: 'red',

@@ -32,7 +32,7 @@ const CommentsScreen = () => {
     try {
       setLoading(true);
       const res = await fetch(
-        `http://192.168.233.236:10000/api/posts/${postId}`,
+        `http://192.168.174.91:10000/api/posts/${postId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -50,7 +50,7 @@ const CommentsScreen = () => {
     if (!newComment.trim()) return;
     try {
       const res = await fetch(
-        `http://192.168.233.236:10000/api/posts/${postId}/comments`,
+        `http://192.168.174.91:10000/api/posts/${postId}/comments`,
         {
           method: "POST",
           headers: {

@@ -26,8 +26,8 @@ async function getAudioTranscription(audioUri: string): Promise<string> {
     const formData = new FormData();
     formData.append('audio', {
       uri: audioUri,
-      type: 'audio/m4a',
-      name: 'recording.m4a',
+      type: 'audio/wav',
+      name: 'recording.wav',
     } as any);
 
     const response = await fetch(`${BASE_URL}/get_transcript`, {
@@ -398,7 +398,7 @@ export default function SpacesScreen() {
 
   return (
     <ImageBackground
-      source={require('@/assets/images/play.jpg')}
+      source={require('@/assets/images/nordic-forest.webp')}
       style={styles.backgroundImage}
       resizeMode="cover"
     >

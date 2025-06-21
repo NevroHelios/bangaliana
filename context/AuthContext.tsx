@@ -4,7 +4,7 @@ import React, { createContext, ReactNode, useContext, useState } from "react";
 import { Alert } from "react-native";
 import { API_BASE_URL } from "@/config/config";
 
-const BACKEND_URL = "http://192.168.233.236:10000";
+const BACKEND_URL = "http://192.168.174.91:10000";
 const TOKEN_KEY = "jwt-token";
 
 interface AuthContextType {

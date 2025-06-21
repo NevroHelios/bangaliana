@@ -1,38 +1,69 @@
 export interface User {
-  id: string;
+  _id: string;
   name?: string;
   email: string;
   bookmarkedPosts?: string[];
 }
 
 export interface Comment {
-  id: string;
-  userId: string;
+  _id: string;
+  userId: string; // or User object if populated
   userName: string;
   text: string;
   timestamp: number;
 }
 
+export interface Location {
+  latitude: number;
+  longitude: number;
+  name?: string;
+}
+
+export interface AISummary {
+  summary: string;
+  hashtags: string[];
+  mood: string;
+  themes: string[];
+  generatedAt: Date;
+  summaryType: 'media' | 'cultural' | 'creative' | 'travel';
+}
+
 export interface MediaItem {
-  id: string; // Will be MongoDB ObjectId
-  uri: string; // URL from cloud storage
+  _id: string;
+  userId: string; // or User object
+  uri: string;
   type: 'photo' | 'video';
   timestamp: number;
   aspectRatio?: number;
-  userId: string; // ID of the user who uploaded
-  title?: string; // Optional title for the media
-  description?: string; // Optional description
-  likes: string[]; // Array of user IDs who liked
+  title?: string;
+  description?: string;
+  likes: string[]; // Array of user IDs
   comments: Comment[];
-  geminiStory?: {
-    [language: string]: string; // e.g., { en: "Story in English", bn: "বাংলা গল্প" }
-  };
-  location?: {
-    latitude: number;
-    longitude: number;
-    name?: string;
-  };
+  location?: Location;
   tags?: string[];
+  aiSummary?: AISummary;
+  // Other context fields can be added if needed
+}
+
+export interface Post {
+  _id: string;
+  userId: User; // Populated
+  title?: string;
+  description?: string;
+  mediaItems: MediaItem[]; // Populated
+  tags: string[];
+  location?: {
+    type: 'Point';
+    coordinates: number[]; // [longitude, latitude]
+    name?: string; // This is what PostCard seems to expect, but backend has it in MediaItem
+  };
+  likes: string[]; // Array of user IDs
+  comments: Comment[];
+  featured: boolean;
+  visibility: 'public' | 'private' | 'community';
+  aiSummary?: AISummary;
+  createdAt: string; // Date string
+  updatedAt: string; // Date string
 }
 
 export interface Space {
@@ -42,7 +73,5 @@ export interface Space {
   creatorId: string;
   timestamp: number;
   eventDate?: number;
-  subscribers: string[]; // User IDs
-  // streamUrl?: string; // For live streaming
-  // posts: MediaItem[]; // Or a separate collection for space-specific posts
+  subscribers: string[];
 }
