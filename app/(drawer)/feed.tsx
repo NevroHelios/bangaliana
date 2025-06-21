@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { Post, Comment } from "@/types";
 import { useRouter } from "expo-router";
+import PostDetailModal from "@/components/PostDetailModal";
 
 interface MediaItem {
   _id: string;
@@ -49,7 +50,7 @@ interface Post {
   };
 }
 
-export const PostCard = ({ item, onLike, onComment }: { item: Post, onLike: (postId: string, likes: string[]) => void, onComment: (postId: string, comments: Comment[]) => void }) => {
+export const PostCard = ({ item, onLike, onComment, onPress }: { item: Post, onLike: (postId: string, likes: string[]) => void, onComment: (postId: string, comments: Comment[]) => void, onPress: (post: Post) => void }) => {
   const { user, token, updateBookmarks } = useAuth();
   const router = useRouter();
   const cardBg = useThemeColor({}, "surface");
@@ -60,26 +61,14 @@ export const PostCard = ({ item, onLike, onComment }: { item: Post, onLike: (pos
   const tagText = useThemeColor({}, "onSecondaryContainer");
 
   const [currentImage, setCurrentImage] = useState(0);
-  const [isLiked, setIsLiked] = useState(item.likes.includes(user?._id || ''));
-  const [likeCount, setLikeCount] = useState(item.likes.length);
   const [commentText, setCommentText] = useState("");
   const [showCommentInput, setShowCommentInput] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(user?.bookmarkedPosts?.includes(item._id) || false);
 
-  useEffect(() => {
-    setIsLiked(item.likes.includes(user?._id || ''));
-    setLikeCount(item.likes.length);
-    setIsBookmarked(user?.bookmarkedPosts?.includes(item._id) || false);
-  }, [item.likes, user]);
+  const isLiked = item.likes.includes(user?._id || '');
+  const likeCount = item.likes.length;
+  const isBookmarked = user?.bookmarkedPosts?.includes(item._id) || false;
 
   const handleLike = async () => {
-    const originalLiked = isLiked;
-    const originalLikeCount = likeCount;
-
-    // Optimistic update
-    setIsLiked(!originalLiked);
-    setLikeCount(originalLiked ? originalLikeCount - 1 : originalLikeCount + 1);
-
     try {
       const res = await fetch(`http://192.168.174.91:10000/api/posts/${item._id}/like`, {
         method: 'PATCH',
@@ -97,9 +86,6 @@ export const PostCard = ({ item, onLike, onComment }: { item: Post, onLike: (pos
 
     } catch (error) {
       console.error("Failed to like post:", error);
-      // Revert on error
-      setIsLiked(originalLiked);
-      setLikeCount(originalLikeCount);
     }
   };
 
@@ -161,110 +147,112 @@ export const PostCard = ({ item, onLike, onComment }: { item: Post, onLike: (pos
   );
 
   return (
-    <View style={[styles.card, { backgroundColor: cardBg }]}>
-      {/* Card Header */}
-      <View style={styles.cardHeader}>
-        <Image
-          source={{
-            uri:
-              item.userId?.avatar ||
-              `https://ui-avatars.com/api/?name=${item.userId?.name}&background=random`,
-          }}
-          style={styles.avatar}
-        />
-        <View>
-          <Text style={[styles.userName, { color: textColor }]}>{item.userId?.name || "Unknown User"}</Text>
-          {item.location?.name && (
-            <Text style={[styles.location, { color: mutedColor }]}>
-              <Ionicons name="location-sharp" size={14} color={mutedColor} /> {item.location.name}
-            </Text>
-          )}
-        </View>
-        <Ionicons name="ellipsis-horizontal" size={24} color={mutedColor} style={styles.ellipsis} />
-      </View>
-
-      {/* Media Content */}
-      {item.mediaItems && item.mediaItems.length > 0 && (
-        <View style={styles.mediaSection}>
-          <FlatList
-            horizontal
-            pagingEnabled
-            data={item.mediaItems}
-            renderItem={renderMediaItem}
-            keyExtractor={(media) => media._id}
-            showsHorizontalScrollIndicator={false}
-            onScroll={(e) => {
-              const index = Math.round(e.nativeEvent.contentOffset.x / (width - 40));
-              setCurrentImage(index);
+    <TouchableOpacity onPress={() => onPress(item)}>
+      <View style={[styles.card, { backgroundColor: cardBg }]}>
+        {/* Card Header */}
+        <View style={styles.cardHeader}>
+          <Image
+            source={{
+              uri:
+                item.userId?.avatar ||
+                `https://ui-avatars.com/api/?name=${item.userId?.name}&background=random`,
             }}
+            style={styles.avatar}
           />
-          {item.mediaItems.length > 1 && (
-            <View style={styles.pagination}>
-              {item.mediaItems.map((_, index) => (
-                <View
-                  key={index}
-                  style={[styles.dot, { backgroundColor: currentImage === index ? primaryColor : mutedColor }]}
-                />
+          <View>
+            <Text style={[styles.userName, { color: textColor }]}>{item.userId?.name || "Unknown User"}</Text>
+            {item.location?.name && (
+              <Text style={[styles.location, { color: mutedColor }]}>
+                <Ionicons name="location-sharp" size={14} color={mutedColor} /> {item.location.name}
+              </Text>
+            )}
+          </View>
+          <Ionicons name="ellipsis-horizontal" size={24} color={mutedColor} style={styles.ellipsis} />
+        </View>
+
+        {/* Media Content */}
+        {item.mediaItems && item.mediaItems.length > 0 && (
+          <View style={styles.mediaSection}>
+            <FlatList
+              horizontal
+              pagingEnabled
+              data={item.mediaItems}
+              renderItem={renderMediaItem}
+              keyExtractor={(media) => media._id}
+              showsHorizontalScrollIndicator={false}
+              onScroll={(e) => {
+                const index = Math.round(e.nativeEvent.contentOffset.x / (width - 40));
+                setCurrentImage(index);
+              }}
+            />
+            {item.mediaItems.length > 1 && (
+              <View style={styles.pagination}>
+                {item.mediaItems.map((_, index) => (
+                  <View
+                    key={index}
+                    style={[styles.dot, { backgroundColor: currentImage === index ? primaryColor : mutedColor }]}
+                  />
+                ))}
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Action Buttons */}
+        <View style={styles.actions}>
+          <TouchableOpacity style={styles.actionButton} onPress={handleLike}>
+            <Ionicons name={isLiked ? "heart" : "heart-outline"} size={28} color={isLiked ? 'red' : textColor} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton} onPress={() => setShowCommentInput(!showCommentInput)}>
+            <Ionicons name="chatbubble-outline" size={26} color={textColor} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton}>
+            <Ionicons name="paper-plane-outline" size={26} color={textColor} />
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.actionButton, { marginLeft: 'auto' }]} onPress={handleBookmark}>
+            <Ionicons name={isBookmarked ? "bookmark" : "bookmark-outline"} size={24} color={isBookmarked ? primaryColor : textColor} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Likes and Description */}
+        <View style={styles.cardFooter}>
+          <Text style={[styles.likes, { color: textColor }]}>{likeCount} likes</Text>
+          <Text style={[styles.description, { color: textColor }]}>
+            <Text style={{ fontWeight: 'bold' }}>{item.userId?.name || "User"} </Text>
+            {item.title || item.description}
+          </Text>
+          {item.comments?.length > 0 && (
+            <TouchableOpacity onPress={() => router.push(`/comments?postId=${item._id}`)}>
+              <Text style={[styles.commentsLink, { color: mutedColor }]}>View all {item.comments.length} comments</Text>
+            </TouchableOpacity>
+          )}
+          {showCommentInput && (
+            <View style={styles.commentInputContainer}>
+              <TextInput
+                style={[styles.commentInput, { color: textColor, borderColor: mutedColor }]}
+                placeholder="Add a comment..."
+                placeholderTextColor={mutedColor}
+                value={commentText}
+                onChangeText={setCommentText}
+              />
+              <TouchableOpacity onPress={handleAddComment}>
+                <Text style={{ color: primaryColor, fontWeight: 'bold' }}>Post</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          {item.tags?.length > 0 && (
+            <View style={styles.tagsContainer}>
+              {item.tags.map((tag, index) => (
+                <View key={index} style={[styles.tag, { backgroundColor: tagBg }]}>
+                  <Text style={[styles.tagText, { color: tagText }]}>#{tag}</Text>
+                </View>
               ))}
             </View>
           )}
+          <Text style={[styles.date, { color: mutedColor }]}>{new Date(item.createdAt).toLocaleDateString()}</Text>
         </View>
-      )}
-
-      {/* Action Buttons */}
-      <View style={styles.actions}>
-        <TouchableOpacity style={styles.actionButton} onPress={handleLike}>
-          <Ionicons name={isLiked ? "heart" : "heart-outline"} size={28} color={isLiked ? 'red' : textColor} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton} onPress={() => setShowCommentInput(!showCommentInput)}>
-          <Ionicons name="chatbubble-outline" size={26} color={textColor} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="paper-plane-outline" size={26} color={textColor} />
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, { marginLeft: 'auto' }]} onPress={handleBookmark}>
-          <Ionicons name={isBookmarked ? "bookmark" : "bookmark-outline"} size={24} color={isBookmarked ? primaryColor : textColor} />
-        </TouchableOpacity>
       </View>
-
-      {/* Likes and Description */}
-      <View style={styles.cardFooter}>
-        <Text style={[styles.likes, { color: textColor }]}>{likeCount} likes</Text>
-        <Text style={[styles.description, { color: textColor }]}>
-          <Text style={{ fontWeight: 'bold' }}>{item.userId?.name || "User"} </Text>
-          {item.title || item.description}
-        </Text>
-        {item.comments?.length > 0 && (
-          <TouchableOpacity onPress={() => router.push(`/comments?postId=${item._id}`)}>
-            <Text style={[styles.commentsLink, { color: mutedColor }]}>View all {item.comments.length} comments</Text>
-          </TouchableOpacity>
-        )}
-        {showCommentInput && (
-          <View style={styles.commentInputContainer}>
-            <TextInput
-              style={[styles.commentInput, { color: textColor, borderColor: mutedColor }]}
-              placeholder="Add a comment..."
-              placeholderTextColor={mutedColor}
-              value={commentText}
-              onChangeText={setCommentText}
-            />
-            <TouchableOpacity onPress={handleAddComment}>
-              <Text style={{ color: primaryColor, fontWeight: 'bold' }}>Post</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        {item.tags?.length > 0 && (
-          <View style={styles.tagsContainer}>
-            {item.tags.map((tag, index) => (
-              <View key={index} style={[styles.tag, { backgroundColor: tagBg }]}>
-                <Text style={[styles.tagText, { color: tagText }]}>#{tag}</Text>
-              </View>
-            ))}
-          </View>
-        )}
-        <Text style={[styles.date, { color: mutedColor }]}>{new Date(item.createdAt).toLocaleDateString()}</Text>
-      </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -273,6 +261,7 @@ const Feed = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const bgColor = useThemeColor({}, "background");
 
   const handleLikeUpdate = (postId: string, newLikes: string[]) => {
@@ -289,6 +278,10 @@ const Feed = () => {
         post._id === postId ? { ...post, comments: newComments } : post
       )
     );
+  };
+
+  const handlePostPress = (post: Post) => {
+    setSelectedPost(post);
   };
 
   useEffect(() => {
@@ -335,19 +328,26 @@ const Feed = () => {
     );
 
   return (
-    <FlatList
-      data={posts}
-      renderItem={({ item }) => <PostCard item={item} onLike={handleLikeUpdate} onComment={handleCommentUpdate} />}
-      keyExtractor={(item) => item._id}
-      contentContainerStyle={{ backgroundColor: bgColor, paddingTop: 10 }}
-      ListEmptyComponent={
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', height: Dimensions.get('window').height * 0.7 }}>
-          <Text style={{ textAlign: "center", margin: 40, fontSize: 16, color: useThemeColor({}, 'onSurface') }}>
-            No posts found.
-          </Text>
-        </View>
-      }
-    />
+    <>
+      <FlatList
+        data={posts}
+        renderItem={({ item }) => <PostCard item={item} onLike={handleLikeUpdate} onComment={handleCommentUpdate} onPress={handlePostPress} />}
+        keyExtractor={(item) => item._id}
+        contentContainerStyle={{ backgroundColor: bgColor, paddingTop: 10 }}
+        ListEmptyComponent={
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', height: Dimensions.get('window').height * 0.7 }}>
+            <Text style={{ textAlign: "center", margin: 40, fontSize: 16, color: useThemeColor({}, 'onSurface') }}>
+              No posts found.
+            </Text>
+          </View>
+        }
+      />
+      <PostDetailModal
+        post={selectedPost}
+        isVisible={!!selectedPost}
+        onClose={() => setSelectedPost(null)}
+      />
+    </>
   );
 };
 

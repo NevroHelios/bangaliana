@@ -16,7 +16,7 @@ const CommentsScreen = () => {
 
   const bgColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'onSurface');
-  const mutedColor = useTheme-color({}, 'onSurfaceVariant');
+  const mutedColor = useThemeColor({}, 'onSurfaceVariant');
   const primaryColor = useThemeColor({}, 'primary');
   const cardBg = useThemeColor({}, 'surface');
 
