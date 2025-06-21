@@ -1,13 +1,13 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useAuth } from '@/context/AuthContext';
-import { useColorScheme, useThemeActions } from '@/hooks/useColorScheme';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { Ionicons } from '@expo/vector-icons';
 import { useHeaderHeight } from '@react-navigation/elements';
 import * as Haptics from 'expo-haptics';
 import React from 'react';
-import { Dimensions, FlatList, Image, Pressable, StyleSheet, View, Switch } from 'react-native';
+import { Dimensions, FlatList, Image, Pressable, StyleSheet, View, Text } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
 
@@ -31,11 +31,9 @@ const ProfileHeader = () => {
     const onSurfaceColor = useThemeColor({}, 'onSurface');
     const onSurfaceVariantColor = useThemeColor({}, 'onSurfaceVariant');
     const primaryColor = useThemeColor({}, 'primary');
-    const theme = useColorScheme();
-    const { toggleTheme } = useThemeActions();
 
     return (
-        <ThemedView style={{ backgroundColor: surfaceColor as string, paddingBottom: 20 }}>
+        <View style={[styles.glassContainer, styles.headerGlass]}>
             <View style={styles.header}>
                 <Image
                     source={{ uri: `https://ui-avatars.com/api/?name=${user?.name}&background=random&color=fff` }}
@@ -43,39 +41,32 @@ const ProfileHeader = () => {
                 />
                 <View style={styles.statsContainer}>
                     <View style={styles.stat}>
-                        <ThemedText style={styles.statNumber}>{userPhotos.length}</ThemedText>
-                        <ThemedText style={[styles.statLabel, {color: onSurfaceVariantColor as string}]}>Photos</ThemedText>
+                        <Text style={[styles.statNumber, styles.glassText]}>{userPhotos.length}</Text>
+                        <Text style={[styles.statLabel, styles.glassText]}>Photos</Text>
                     </View>
                     <View style={styles.stat}>
-                        <ThemedText style={styles.statNumber}>1.2k</ThemedText>
-                        <ThemedText style={[styles.statLabel, {color: onSurfaceVariantColor as string}]}>Followers</ThemedText>
+                        <Text style={[styles.statNumber, styles.glassText]}>1.2k</Text>
+                        <Text style={[styles.statLabel, styles.glassText]}>Followers</Text>
                     </View>
                     <View style={styles.stat}>
-                        <ThemedText style={styles.statNumber}>312</ThemedText>
-                        <ThemedText style={[styles.statLabel, {color: onSurfaceVariantColor as string}]}>Following</ThemedText>
+                        <Text style={[styles.statNumber, styles.glassText]}>312</Text>
+                        <Text style={[styles.statLabel, styles.glassText]}>Following</Text>
                     </View>
                 </View>
             </View>
-            <ThemedText style={styles.userName}>{user?.name}</ThemedText>
-            <ThemedText style={[styles.userBio, {color: onSurfaceVariantColor as string}]}>
+            <Text style={[styles.userName, styles.glassText]}>{user?.name}</Text>
+            <Text style={[styles.userBio, styles.glassText]}>
                 Discovering the soul of Bengal, one photo at a time.
-            </ThemedText>
+            </Text>
             <View style={styles.buttonRow}>
-                 <Pressable style={[styles.profileButton, {backgroundColor: primaryColor as string}]}>
-                    <ThemedText style={{color: useThemeColor({}, 'onPrimary') as string, fontWeight: '600'}}>Edit Profile</ThemedText>
+                 <Pressable style={[styles.profileButton, styles.glassButton]}>
+                    <Text style={[styles.buttonText, styles.glassText]}>Edit Profile</Text>
                 </Pressable>
-                 <Pressable style={[styles.profileButton, {backgroundColor: useThemeColor({}, 'surfaceVariant') as string}]}>
-                    <ThemedText style={{color: onSurfaceColor as string, fontWeight: '600'}}>Share Profile</ThemedText>
+                 <Pressable style={[styles.profileButton, styles.glassButton]}>
+                    <Text style={[styles.buttonText, styles.glassText]}>Share Profile</Text>
                 </Pressable>
             </View>
-            <View style={styles.themeSwitchContainer}>
-                <ThemedText>Dark Mode</ThemedText>
-                <Switch
-                    value={theme === 'dark'}
-                    onValueChange={toggleTheme}
-                />
-            </View>
-        </ThemedView>
+        </View>
     );
 }
 
@@ -93,24 +84,38 @@ export default function ProfileScreen() {
     );
 
     return (
-        <ThemedView style={[styles.container, {backgroundColor: backgroundColor as string}]}>
+        <View style={styles.container}>
+            {/* Background Image */}
+            <Image
+                source={require('@/assets/images/heritage2.avif')}
+                style={styles.backgroundImage}
+            />
+            
+            {/* Dark Overlay */}
+            <LinearGradient
+                colors={['rgba(0, 0, 0, 0.7)', 'rgba(0, 0, 0, 0.8)', 'rgba(0, 0, 0, 0.9)']}
+                style={styles.backgroundOverlay}
+            />
+
+            {/* Content */}
             <FlatList
+                style={styles.contentContainer}
                 ListHeaderComponent={
                     <>
                         <View style={{height: headerHeight}} />
                         <ProfileHeader />
-                        <View style={styles.tabContainer}>
+                        <View style={[styles.tabContainer, styles.glassContainer]}>
                             <Pressable 
                                 onPress={() => { setActiveTab('photos'); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);}} 
-                                style={[styles.tab, { borderBottomColor: activeTab === 'photos' ? primaryColor as string : 'transparent'}]}
+                                style={[styles.tab, { borderBottomColor: activeTab === 'photos' ? 'rgba(255, 255, 255, 0.8)' : 'transparent'}]}
                             >
-                                <Ionicons name="grid" size={20} color={activeTab === 'photos' ? primaryColor as string : onSurfaceVariantColor as string} />
+                                <Ionicons name="grid" size={20} color={activeTab === 'photos' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'} />
                             </Pressable>
                              <Pressable 
                                 onPress={() => { setActiveTab('liked'); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);}} 
-                                style={[styles.tab, { borderBottomColor: activeTab === 'liked' ? primaryColor as string : 'transparent'}]}
+                                style={[styles.tab, { borderBottomColor: activeTab === 'liked' ? 'rgba(255, 255, 255, 0.8)' : 'transparent'}]}
                             >
-                                <Ionicons name="heart" size={22} color={activeTab === 'liked' ? primaryColor as string : onSurfaceVariantColor as string} />
+                                <Ionicons name="heart" size={22} color={activeTab === 'liked' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'} />
                             </Pressable>
                         </View>
                     </>
@@ -121,25 +126,73 @@ export default function ProfileScreen() {
                 numColumns={3}
                 key={activeTab}
             />
-        </ThemedView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        position: 'relative',
+    },
+    backgroundImage: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        height: '100%',
+    },
+    backgroundOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        height: '100%',
+    },
+    contentContainer: {
+        flex: 1,
+        position: 'relative',
+    },
+    glassContainer: {
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.2)',
+        backdropFilter: 'blur(20px)',
+        borderRadius: 16,
+        margin: 12,
+        padding: 16,
+    },
+    headerGlass: {
+        marginTop: 8,
+    },
+    glassText: {
+        color: 'white',
+        textShadowColor: 'black',
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 2,
+    },
+    glassButton: {
+        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.3)',
+        backdropFilter: 'blur(10px)',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingTop: 20,
+        paddingBottom: 8,
     },
     avatar: {
         width: 80,
         height: 80,
         borderRadius: 40,
         marginRight: 20,
+        borderWidth: 2,
+        borderColor: 'rgba(255, 255, 255, 0.3)',
     },
     statsContainer: {
         flexDirection: 'row',
@@ -160,11 +213,9 @@ const styles = StyleSheet.create({
     userName: {
         fontSize: 18,
         fontWeight: '600',
-        paddingHorizontal: 20,
         marginTop: 10,
     },
     userBio: {
-        paddingHorizontal: 20,
         marginTop: 4,
         fontSize: 14,
         lineHeight: 20,
@@ -172,21 +223,25 @@ const styles = StyleSheet.create({
     buttonRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingHorizontal: 20,
         marginTop: 20,
     },
     profileButton: {
         flex: 1,
-        paddingVertical: 10,
-        borderRadius: 8,
+        paddingVertical: 12,
+        borderRadius: 12,
         alignItems: 'center',
         marginHorizontal: 4,
+    },
+    buttonText: {
+        fontWeight: '600',
+        fontSize: 14,
     },
     tabContainer: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        borderBottomWidth: 1,
-        borderBottomColor: 'rgba(0,0,0,0.1)',
+        marginTop: 8,
+        paddingTop: 8,
+        paddingBottom: 8,
     },
     tab: {
         paddingVertical: 12,
@@ -203,12 +258,6 @@ const styles = StyleSheet.create({
         flex: 1,
         width: '100%',
         height: '100%',
-    },
-    themeSwitchContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        marginTop: 20,
+        borderRadius: 8,
     },
 });
