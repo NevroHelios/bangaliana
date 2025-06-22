@@ -23,6 +23,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ImageBackground,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { API_BASE_URL } from '@/config/config';
@@ -752,26 +753,31 @@ const MediaPostCreator = () => {
   );
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: backgroundColor as string }]}>
-      <View style={{ paddingTop: headerHeight, flex: 1 }}>
-        {showPaymentModal ? (
-          <PaymentScreen onBuy={handlePaymentBuy} onCancel={handlePaymentCancel} />
-        ) : (
-          <>
-            {currentStep === 'media' && renderMediaSelection()}
-            {currentStep === 'details' && renderDetailsForm()}
-            {currentStep === 'preview' && renderPreview()}
-          </>
-        )}
-      </View>
-    </SafeAreaView>
+    <ImageBackground 
+      source={require('../../assets/images/nordic-forest.webp')}
+      style={styles.backgroundImage}
+    >
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: 'transparent' }]}>
+        <View style={{ paddingTop: headerHeight, flex: 1 }}>
+          {showPaymentModal ? (
+            <PaymentScreen onBuy={handlePaymentBuy} onCancel={handlePaymentCancel} />
+          ) : (
+            <>
+              {currentStep === 'media' && renderMediaSelection()}
+              {currentStep === 'details' && renderDetailsForm()}
+              {currentStep === 'preview' && renderPreview()}
+            </>
+          )}
+        </View>
+      </SafeAreaView>
+    </ImageBackground>
   );
 };
 
 const paymentStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.95)', 
+    //backgroundColor: 'rgba(0, 0, 0, 0.95)', 
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -884,6 +890,11 @@ const paymentStyles = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   safeArea: {
     flex: 1,
   },
@@ -911,7 +922,7 @@ const styles = StyleSheet.create({
   mainMediaContainer: {
     position: 'relative',
     aspectRatio: 1,
-    backgroundColor: '#000000',
+    //backgroundColor: '#000000',
     borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 12,
@@ -945,7 +956,7 @@ const styles = StyleSheet.create({
   navButton: {
     position: 'absolute',
     top: '50%',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    //backgroundColor: 'rgba(0, 0, 0, 0.4)',
     borderRadius: 20,
     padding: 8,
   },
@@ -1196,7 +1207,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     right: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    //backgroundColor: 'rgba(0, 0, 0, 0.6)',
     borderRadius: 12,
     paddingHorizontal: 8,
     paddingVertical: 4,

@@ -45,7 +45,7 @@ const ProfileHeader = () => {
                         <Text style={[styles.statLabel, styles.glassText]}>Photos</Text>
                     </View>
                     <View style={styles.stat}>
-                        <Text style={[styles.statNumber, styles.glassText]}>1.2k</Text>
+                        <Text style={[styles.statNumber, styles.glassText]}>1k</Text>
                         <Text style={[styles.statLabel, styles.glassText]}>Followers</Text>
                     </View>
                     <View style={styles.stat}>
@@ -87,7 +87,7 @@ export default function ProfileScreen() {
         <View style={styles.container}>
             {/* Background Image */}
             <Image
-                source={require('@/assets/images/heritage2.avif')}
+                source={require('@/assets/images/nordic-forest.webp')}
                 style={styles.backgroundImage}
             />
             
