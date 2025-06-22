@@ -8,7 +8,7 @@ import React, {
 import * as SecureStore from "expo-secure-store";
 import { Alert } from "react-native";
 import { API_BASE_URL } from "@/config/config";
-const API_URL = "http://192.168.233.236:10000";
+const API_URL = "http://192.168.174.91:10000";
 const TOKEN_KEY = "auth-token";
 
 interface User {

@@ -9,15 +9,18 @@ import {
 } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { PostCard } from "./feed"; // Assuming PostCard is exported from feed.tsx
-import { Post } from "@/types"; // Assuming Post type is exported from types
+import { PostCard } from "@/components/feed/PostCard"; // Corrected import
+import { Post, Comment } from "@/types";
 import { useFocusEffect } from "@react-navigation/native";
+import PostDetailModal from "@/components/PostDetailModal";
 
 const BookmarksScreen = () => {
   const { token, user } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
   const bgColor = useThemeColor({}, "background");
 
   const fetchBookmarks = async () => {
@@ -26,7 +29,7 @@ const BookmarksScreen = () => {
     setError(null);
     try {
       const res = await fetch(
-        `http://192.168.233.236:10000/api/users/bookmarks`,
+        `http://192.168.174.91:10000/api/users/bookmarks`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -62,12 +65,17 @@ const BookmarksScreen = () => {
     );
   };
 
-  const handleCommentUpdate = (postId: string, newComments: any[]) => {
+  const handleCommentUpdate = (postId: string, newComments: Comment[]) => {
     setPosts((prevPosts) =>
       prevPosts.map((post) =>
         post._id === postId ? { ...post, comments: newComments } : post
       )
     );
+  };
+
+  const handlePostPress = (post: Post) => {
+    setSelectedPost(post);
+    setModalVisible(true);
   };
 
   if (loading)
@@ -99,39 +107,48 @@ const BookmarksScreen = () => {
     );
 
   return (
-    <FlatList
-      data={posts}
-      renderItem={({ item }) => (
-        <PostCard
-          item={item}
-          onLike={handleLikeUpdate}
-          onComment={handleCommentUpdate}
-        />
-      )}
-      keyExtractor={(item) => item._id}
-      contentContainerStyle={{ backgroundColor: bgColor, paddingTop: 10 }}
-      ListEmptyComponent={
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            height: Dimensions.get("window").height * 0.7,
-          }}
-        >
-          <Text
+    <>
+      <FlatList
+        data={posts}
+        renderItem={({ item }) => (
+          <PostCard
+            item={item}
+            onLike={handleLikeUpdate}
+            onComment={handleCommentUpdate}
+            onPress={handlePostPress}
+          />
+        )
+        }
+        keyExtractor={(item) => item._id}
+        contentContainerStyle={{ backgroundColor: bgColor, paddingTop: 10 }}
+        ListEmptyComponent={
+          <View
             style={{
-              textAlign: "center",
-              margin: 40,
-              fontSize: 16,
-              color: useThemeColor({}, "onSurface"),
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              height: Dimensions.get("window").height * 0.7,
             }}
           >
-            You haven't bookmarked any posts yet.
-          </Text>
-        </View>
-      }
-    />
+            <Text
+              style={{
+                textAlign: "center",
+                margin: 40,
+                fontSize: 16,
+                color: useThemeColor({}, "onSurface"),
+              }}
+            >
+              You haven't bookmarked any posts yet.
+            </Text>
+          </View>
+        }
+      />
+      <PostDetailModal
+        post={selectedPost}
+        isVisible={modalVisible}
+        onClose={() => setModalVisible(false)}
+      />
+    </>
   );
 };
 

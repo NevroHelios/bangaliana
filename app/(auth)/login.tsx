@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
+    ImageBackground,
     KeyboardAvoidingView,
     Platform,
     StyleSheet,
@@ -110,7 +111,7 @@ export default function LoginScreen() {
       elevation: 8,
     },
     buttonText: {
-      color: buttonTextColor as string,
+      color: "white",
       fontSize: 18,
       fontWeight: "600",
     },
@@ -131,50 +132,56 @@ export default function LoginScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <LinearGradient
-        colors={theme === 'light' ? ['#fde4f5', '#fce3f5'] : ['#2c1e3e', '#1a1128']}
-        style={styles.gradient}
+      <ImageBackground
+        source={require("@/assets/images/bg.jpg")}
+        style={{ flex: 1 }}
+        resizeMode="cover"
       >
-        <Animated.View style={[styles.content, animatedStyle]}>
-          <ThemedText type="title" style={styles.title}>Welcome Back</ThemedText>
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            placeholderTextColor={placeholderTextColor as string}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholderTextColor={placeholderTextColor as string}
-          />
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleLogin}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color={buttonTextColor as string} />
-            ) : (
-              <ThemedText style={styles.buttonText}>Login</ThemedText>
-            )}
-          </TouchableOpacity>
-          <View style={styles.footer}>
-            <ThemedText>Don't have an account? </ThemedText>
-            <Link href="/(auth)/signup" asChild>
-              <TouchableOpacity>
-                <ThemedText style={styles.link}>Sign Up</ThemedText>
-              </TouchableOpacity>
-            </Link>
-          </View>
-        </Animated.View>
-      </LinearGradient>
+        <LinearGradient
+          colors={theme === 'light' ? ['#fde4f5c', '#fce3f5cc'] : ['#2c1e3ecc', '#1a1128cc']}
+          style={styles.gradient}
+        >
+          <Animated.View style={[styles.content, animatedStyle]}>
+            <ThemedText type="title" style={styles.title}>Welcome Back</ThemedText>
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              placeholderTextColor={placeholderTextColor as string}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              placeholderTextColor={placeholderTextColor as string}
+            />
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleLogin}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color={buttonTextColor as string} />
+              ) : (
+                <ThemedText style={styles.buttonText}>Login</ThemedText>
+              )}
+            </TouchableOpacity>
+            <View style={styles.footer}>
+              <ThemedText>Don't have an account? </ThemedText>
+              <Link href="/(auth)/signup" asChild>
+                <TouchableOpacity>
+                  <ThemedText style={styles.link}>Sign Up</ThemedText>
+                </TouchableOpacity>
+              </Link>
+            </View>
+          </Animated.View>
+        </LinearGradient>
+      </ImageBackground>
     </KeyboardAvoidingView>
   );
 }

@@ -398,7 +398,7 @@ export default function SpacesScreen() {
 
   return (
     <ImageBackground
-      source={require('@/assets/images/play.jpg')}
+      source={require('@/assets/images/nordic-forest.webp')}
       style={styles.backgroundImage}
       resizeMode="cover"
     >

@@ -24,12 +24,12 @@ export default function HomeScreen() {
   const collageImages = [
     {
       id: 1,
-      source: require("@/assets/images/kolkata.jpg"),
+      source: require("@/assets/images/kol.jpeg"),
       color: "rgba(255, 87, 51, 0.8)",
     },
     {
       id: 2,
-      source: require("@/assets/images/durgapujo.jpg"),
+      source: require("@/assets/images/rural.jpg"),
       color: "rgba(51, 255, 87, 0.8)",
     },
     {
@@ -39,12 +39,12 @@ export default function HomeScreen() {
     },
     {
       id: 4,
-      source: require("@/assets/images/krishna.jpg"),
+      source: require("@/assets/images/sto.jpg"),
       color: "rgba(255, 187, 51, 0.8)",
     },
     {
       id: 5,
-      source: require("@/assets/images/heritage2.avif"),
+      source: require("@/assets/images/hercul.jpg"),
       color: "rgba(255, 51, 187, 0.8)",
     },
     {
@@ -54,7 +54,7 @@ export default function HomeScreen() {
     },
     {
       id: 7,
-      source: require("@/assets/images/kolkata.jpg"),
+      source: require("@/assets/images/cul.jpg"),
       color: "rgba(255, 87, 51, 0.8)",
     },
     {
@@ -64,12 +64,12 @@ export default function HomeScreen() {
     },
     {
       id: 9,
-      source: require("@/assets/images/play.jpg"),
+      source: require("@/assets/images/bg.jpg"),
       color: "rgba(87, 51, 255, 0.8)",
     },
     {
       id: 10,
-      source: require("@/assets/images/krishna.jpg"),
+      source: require("@/assets/images/her.jpg"),
       color: "rgba(255, 187, 51, 0.8)",
     },
     {
@@ -79,17 +79,17 @@ export default function HomeScreen() {
     },
     {
       id: 12,
-      source: require("@/assets/images/kolkata.jpg"),
+      source: require("@/assets/images/rural.jpg"),
       color: "rgba(51, 187, 255, 0.8)",
     },
   ];
 
   const featuredCollections = [
-    { id: "1", source: require("@/assets/images/kolkata.jpg"), title: "Kolkata Vibes" },
+    { id: "1", source: require("@/assets/images/kol.jpeg"), title: "Kolkata Vibes" },
     { id: "2", source: require("@/assets/images/durgapujo.jpg"), title: "Durga Pujo", },
-    { id: "3", source: require("@/assets/images/play.jpg"), title: "Stories", },
+    { id: "3", source: require("@/assets/images/sto.jpg"), title: "Stories", },
     { id: "4", source: require("@/assets/images/krishna.jpg"), title: "Divine Hues", },
-    { id: "5", source: require("@/assets/images/heritage2.avif"), title: "Heritage", },
+    { id: "5", source: require("@/assets/images/her.jpg"), title: "Heritage", },
     { id: "6", source: require("@/assets/images/kolkata.jpg"), title: "City Life",  },
   ];
 
@@ -279,7 +279,7 @@ export default function HomeScreen() {
           />
 
           <View style={styles.overlayContent}>
-            <Text style={styles.mainTitle}>বাংলার ঐতিহ্য</Text>
+            <Text style={{ fontSize: 65, fontWeight: 'bold', color: 'white' }}>বঙ্গ-Lore</Text>
           </View>
        
         </View>
@@ -453,7 +453,7 @@ export default function HomeScreen() {
           ]}
         >
           <Pressable style={styles.bannerContainer}>
-            <Image source={require("@/assets/images/krishna.jpg")} style={styles.bannerImage}/>
+            <Image source={require("@/assets/images/cul.jpg")} style={styles.bannerImage}/>
             <View style={styles.bannerOverlay}/>
             <View style={styles.bannerTextContainer}>
               <Text style={styles.bannerTitle}>Timeless Stories</Text>
@@ -507,6 +507,7 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 16,
     color: "white",
+    left: 20,
     // textAlign: "center",
     marginVertical: 10,
     textShadowColor: "rgba(0, 0, 0, 0.5)",
@@ -619,7 +620,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     textShadowColor: "#f0d7d7",
     textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 4,
+    // textShadowRadius: 4,
   },
   horizontalScroll: {
     paddingLeft: 10,
