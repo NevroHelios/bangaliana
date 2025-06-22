@@ -1,116 +1,25 @@
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { Colors } from '@/constants/Colors';
+      
+import { API_BASE_URL } from '@/config/config';
+import { useAuth } from '@/context/AuthContext';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { Ionicons } from '@expo/vector-icons';
+import { MediaItem, PostData } from '@/types'; // Make sure this path is correct for your project
 import { useHeaderHeight } from '@react-navigation/elements';
-import { ResizeMode, Video } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import * as FileSystem from 'expo-file-system';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  FlatList,
-  Image,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { useAuth } from '../../context/AuthContext';
-import { API_BASE_URL } from '@/config/config';
+import { Alert, ImageBackground, SafeAreaView, StyleSheet, View } from 'react-native';
+import { DetailsForm } from '@/components/postCreator/DetailsForm';
+import { MediaSelection } from '@/components/postCreator/MediaSelection';
+import { PaymentScreen } from '@/components/postCreator/PaymentScreen';
+import { PostPreview } from '@/components/postCreator/PostPreview';
 
-const { width } = Dimensions.get('window');
-
-type MediaItem = {
-  id: number;
-  type: "image" | "video" | "livePhoto" | "pairedVideo" | undefined;
-  uri: string;
-  width: number;
-  height: number;
-  fileName?: string | null;
-  fileSize?: number;
-};
-
-interface LocationData {
-  name: string;
-  latitude?: number;
-  longitude?: number;
-}
-
-interface PostData {
-  userId: string;
-  mediaItems: MediaItem[];
-  title: string;
-  description: string;
-  location: LocationData | null;
-  visibility: 'public' | 'private' | 'friends';
-  featured: boolean;
-  comments: any[];
-  aiSummary: any;
-  culturalContext: any;
-  creativeContext: any;
-  travelContext: any;
-}
-
-interface PaymentScreenProps {
-  onBuy: () => void;
-  onCancel: () => void;
-}
-
-const PaymentScreen: React.FC<PaymentScreenProps> = ({ onBuy, onCancel }) => {
-  return (
-    <View style={paymentStyles.container}>
-      <View style={paymentStyles.header}>
-        <Text style={paymentStyles.title}>Unlock Featured Post</Text>
-        <Text style={paymentStyles.description}>
-          Make your post shine! Feature it to reach a wider audience and stand out in the feed.
-        </Text>
-      </View>
-
-      <View style={paymentStyles.planCard}>
-        <Ionicons name="star" size={40} color="#F59E0B" style={paymentStyles.starIcon} />
-        <Text style={paymentStyles.planName}>Featured Post Boost</Text>
-        <Text style={paymentStyles.planPrice}>$4.99</Text>
-        <Text style={paymentStyles.planDuration}>One-time payment per post</Text>
-        <View style={paymentStyles.featuresList}>
-          <View style={paymentStyles.featureItem}>
-            <Ionicons name="checkmark-circle" size={18} color="#34D399" />
-            <Text style={paymentStyles.featureText}>Increased Visibility</Text>
-          </View>
-          <View style={paymentStyles.featureItem}>
-            <Ionicons name="checkmark-circle" size={18} color="#34D399" />
-            <Text style={paymentStyles.featureText}>Appears in Featured Section</Text>
-          </View>
-          <View style={paymentStyles.featureItem}>
-            <Ionicons name="checkmark-circle" size={18} color="#34D399" />
-            <Text style={paymentStyles.featureText}>Higher Engagement Potential</Text>
-          </View>
-        </View>
-      </View>
-
-      <View style={paymentStyles.buttonContainer}>
-        <TouchableOpacity style={paymentStyles.buyButton} onPress={onBuy}>
-          <Text style={paymentStyles.buttonText}>Buy Now</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={paymentStyles.cancelButton} onPress={onCancel}>
-          <Text style={paymentStyles.buttonText}>Cancel</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
+// Ensure you have an image at this path or update it.
+const backgroundImage = require('@/assets/images/heritage2.avif');
 
 const MediaPostCreator = () => {
   const { user, token } = useAuth();
-  const [currentStep, setCurrentStep] = useState('media');
+  const [currentStep, setCurrentStep] = useState<'media' | 'details' | 'preview'>('media');
   const [selectedMedia, setSelectedMedia] = useState<MediaItem[]>([]);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -118,7 +27,7 @@ const MediaPostCreator = () => {
   const { imageUri, imageAspectRatio } = useLocalSearchParams<{ imageUri?: string, imageAspectRatio?: string }>();
 
   const [postData, setPostData] = useState<PostData>({
-    userId: '',
+    userId: user?.id || '',
     mediaItems: [],
     title: '',
     description: '',
@@ -129,13 +38,12 @@ const MediaPostCreator = () => {
     aiSummary: null,
     culturalContext: null,
     creativeContext: null,
-    travelContext: null
+    travelContext: null,
   });
 
-  const [isFetchingLocation, setIsFetchingLocation] = useState(false);
   const [locationVisibility, setLocationVisibility] = useState(true);
 
-  const backgroundColor = useThemeColor({}, 'background');
+  // Theme colors are still needed for UI elements like buttons, text, etc.
   const onBackgroundColor = useThemeColor({}, 'onBackground');
   const primaryColor = useThemeColor({}, 'primary');
   const onPrimaryColor = useThemeColor({}, 'onPrimary');
@@ -148,9 +56,7 @@ const MediaPostCreator = () => {
   const headerHeight = useHeaderHeight();
 
   useEffect(() => {
-    if (user) {
-      setPostData(prev => ({ ...prev, userId: user.id }));
-    }
+    if (user) setPostData((prev) => ({ ...prev, userId: user.id }));
   }, [user]);
 
   useEffect(() => {
@@ -159,8 +65,8 @@ const MediaPostCreator = () => {
         id: Date.now(),
         uri: imageUri,
         type: 'image',
-        width: imageAspectRatio ? parseFloat(imageAspectRatio) * 400 : 400, // Estimate width
-        height: 400, // Estimate height
+        width: imageAspectRatio ? parseFloat(imageAspectRatio) * 400 : 400,
+        height: 400,
       };
       setSelectedMedia([newMediaItem]);
       setCurrentStep('details');
@@ -172,44 +78,20 @@ const MediaPostCreator = () => {
   }, []);
 
   const fetchUserLocation = async () => {
-    setIsFetchingLocation(true);
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'Permission to access location was denied. Please enable it in settings to auto-fill location.');
-      setIsFetchingLocation(false);
+      Alert.alert('Permission Denied', 'Permission to access location was denied.');
       return;
     }
-
     try {
       let location = await Location.getCurrentPositionAsync({});
-      let geocode = await Location.reverseGeocodeAsync({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-
+      let geocode = await Location.reverseGeocodeAsync(location.coords);
       if (geocode && geocode.length > 0) {
-        const address = geocode[0];
-        const locationName = [
-          address.name,
-          address.street,
-          address.city,
-          address.region,
-          address.country
-        ].filter(Boolean).join(', ');
-
+        const { city, region, country } = geocode[0];
         setPostData(prev => ({
           ...prev,
           location: {
-            name: locationName,
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-          },
-        }));
-      } else {
-        setPostData(prev => ({
-          ...prev,
-          location: {
-            name: `Lat: ${location.coords.latitude.toFixed(4)}, Lon: ${location.coords.longitude.toFixed(4)}`,
+            name: [city, region, country].filter(Boolean).join(', '),
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
           },
@@ -217,197 +99,124 @@ const MediaPostCreator = () => {
       }
     } catch (error) {
       console.error('Error fetching location:', error);
-      Alert.alert('Location Error', 'Could not fetch your current location.');
-    } finally {
-      setIsFetchingLocation(false);
     }
   };
-
-  const requestPermissions = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission needed', 'We need camera roll permissions to select media');
-      return false;
-    }
-    return true;
+  
+  const resetState = () => {
+    setSelectedMedia([]);
+    setCurrentMediaIndex(0);
+    setPostData({
+      userId: user?.id || '',
+      mediaItems: [],
+      title: '',
+      description: '',
+      location: null,
+      visibility: 'public',
+      featured: false,
+      comments: [],
+      aiSummary: null,
+      culturalContext: null,
+      creativeContext: null,
+      travelContext: null,
+    });
+    setCurrentStep('media');
+    fetchUserLocation();
   };
 
   const pickMedia = async () => {
-    const hasPermission = await requestPermissions();
-    if (!hasPermission) return;
-
-    if (selectedMedia.length >= 20) {
-      Alert.alert('Limit reached', 'You can only select up to 20 media items');
-      return;
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+        Alert.alert('Permission needed', 'We need camera roll permissions to select media');
+        return;
     }
-
+    if (selectedMedia.length >= 20) {
+        Alert.alert('Limit reached', 'You can only select up to 20 media items');
+        return;
+    }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsMultipleSelection: true,
-      quality: 0.8,
-      aspect: [1, 1],
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsMultipleSelection: true,
+        quality: 0.8,
     });
-
     if (!result.canceled) {
-      const newMedia = result.assets.map((asset, index) => ({
-        id: Date.now() + index + Math.random(),
-        type: asset.type,
-        uri: asset.uri,
-        width: asset.width,
-        height: asset.height,
-        fileName: asset.fileName,
-        fileSize: asset.fileSize,
-      }));
-
-      setSelectedMedia(prev => {
-        const combined = [...prev, ...newMedia];
-        return combined.slice(0, 20);
-      });
+        const newMedia = result.assets.map((asset, index) => ({
+          id: Date.now() + index + Math.random(),
+          type: asset.type,
+          uri: asset.uri,
+          width: asset.width,
+          height: asset.height,
+          fileName: asset.fileName,
+          fileSize: asset.fileSize,
+        }));
+        setSelectedMedia(prev => [...prev, ...newMedia].slice(0, 20));
     }
   };
 
   const removeMedia = (mediaId: number) => {
-    setSelectedMedia((prev: MediaItem[]) => prev.filter(item => item.id !== mediaId));
-    setCurrentMediaIndex((prevIndex) => {
-      const newLength = selectedMedia.length - 1;
-      if (newLength === 0) return 0;
-      if (prevIndex >= newLength) {
-        return Math.max(0, newLength - 1);
-      }
-      return prevIndex;
-    });
+    const newMedia = selectedMedia.filter(item => item.id !== mediaId);
+    setSelectedMedia(newMedia);
+    if (newMedia.length === 0) {
+        setCurrentMediaIndex(0);
+    } else if (currentMediaIndex >= newMedia.length) {
+        setCurrentMediaIndex(newMedia.length - 1);
+    }
   };
 
-  // --- REWRITE: handlePost using FormData with detailed debug logs and robust error detection ---
   const handlePost = async () => {
-    if (!user || !token) {
-      Alert.alert('Not Authenticated', 'You must be logged in to post.');
-      return;
-    }
-    if (selectedMedia.length === 0) {
-      Alert.alert('No Media', 'Please select at least one image or video to post.');
-      return;
-    }
+    if (!user || !token) return Alert.alert('Not Authenticated', 'You must be logged in to post.');
+    if (selectedMedia.length === 0) return Alert.alert('No Media', 'Please select at least one item.');
 
-    const finalLocation = postData.location;
     const formData = new FormData();
-
     try {
-      console.log('[DEBUG] Preparing to append media files:', selectedMedia);
-      // Append media files
-      for (let idx = 0; idx < selectedMedia.length; idx++) {
-        const media = selectedMedia[idx];
-        let mimeType = 'image/jpeg';
-        let ext = 'jpg';
-        if (media.type === 'video') {
-          mimeType = 'video/mp4';
-          ext = 'mp4';
-        } else if (media.type === 'image') {
-          mimeType = 'image/jpeg';
-          ext = 'jpg';
+        for (let i = 0; i < selectedMedia.length; i++) {
+            const media = selectedMedia[i];
+            const uriParts = media.uri.split('.');
+            const fileType = uriParts[uriParts.length - 1];
+            
+            formData.append('media', {
+                uri: media.uri,
+                name: media.fileName || `post_media_${i}.${fileType}`,
+                type: `${media.type}/${fileType}`,
+            } as any);
         }
-        let fileUri = media.uri;
-        // If file is from camera and is file://, copy to cache dir to ensure accessibility
-        if (fileUri.startsWith('file://')) {
-          const destPath = `${FileSystem.cacheDirectory}upload_${Date.now()}_${idx}.${ext}`;
-          await FileSystem.copyAsync({ from: fileUri, to: destPath });
-          fileUri = destPath;
+
+        formData.append('userId', user.id);
+        formData.append('title', postData.title);
+        formData.append('description', postData.description);
+        formData.append('visibility', postData.visibility);
+        formData.append('featured', String(postData.featured));
+
+        if (postData.location) {
+            formData.append('locationName', postData.location.name);
+            if (postData.location.latitude) formData.append('latitude', String(postData.location.latitude));
+            if (postData.location.longitude) formData.append('longitude', String(postData.location.longitude));
         }
-        formData.append('media', {
-          uri: fileUri,
-          name: media.fileName || `media_${idx}.${ext}`,
-          type: mimeType,
-        } as any);
-      }
 
-      // Append other fields
-      formData.append('userId', user.id); // Always use user.id
-      formData.append('title', postData.title || '');
-      formData.append('description', postData.description || '');
-      formData.append('visibility', postData.visibility);
-      formData.append('featured', postData.featured ? 'true' : 'false');
+        const response = await fetch(`${API_BASE_URL}/api/posts/createpost`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData,
+        });
 
-      if (finalLocation) {
-        formData.append('locationName', finalLocation.name);
-        if (finalLocation.latitude) formData.append('latitude', String(finalLocation.latitude));
-        if (finalLocation.longitude) formData.append('longitude', String(finalLocation.longitude));
-      }
-
-      // Debug: log all FormData keys
-      // @ts-ignore
-      for (let pair of formData.entries()) {
-        console.log(`[DEBUG] FormData field: ${pair[0]} =`, pair[1]);
-      }
-
-      const apiUrl = `${API_BASE_URL}/api/posts/createpost`;
-      console.log('[DEBUG] Sending POST request to', apiUrl);
-
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData as any,
-      });
-
-      console.log('[DEBUG] Response status:', response.status);
-      let responseData: any = null;
-      let responseText: string = '';
-      try {
-        responseText = await response.text();
-        try {
-          responseData = JSON.parse(responseText);
-        } catch (jsonErr) {
-          responseData = responseText;
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to create post');
         }
-      } catch (err) {
-        console.error('[DEBUG] Error reading response text:', err);
-      }
 
-      if (!response.ok) {
-        console.error('[DEBUG] Error response:', responseData);
-        let errorMsg = 'Failed to share post';
-        if (responseData && typeof responseData === 'object' && responseData.message) {
-          errorMsg = responseData.message;
-        } else if (typeof responseData === 'string') {
-          errorMsg = responseData;
-        }
-        throw new Error(errorMsg);
-      }
-
-      console.log('[DEBUG] Post successful:', responseData);
-      Alert.alert('Success', 'Post created successfully!');
-
-      setSelectedMedia([]);
-      setCurrentStep('media');
-      setCurrentMediaIndex(0);
-      setPostData({
-        userId: user?.id || '',
-        mediaItems: [],
-        title: '',
-        description: '',
-        location: null,
-        visibility: 'public',
-        featured: false,
-        comments: [],
-        aiSummary: null,
-        culturalContext: null,
-        creativeContext: null,
-        travelContext: null
-      });
-
-      fetchUserLocation();
+        Alert.alert('Success', 'Post created successfully!');
+        resetState();
     } catch (error: any) {
-      console.error('[DEBUG] Error in handlePost:', error, error?.stack);
-      let errorMsg = 'Unknown error';
-      if (error && error.message) errorMsg = error.message;
-      Alert.alert('Error', `Failed to share post: ${errorMsg}`);
+        console.error('[DEBUG] Error in handlePost:', error);
+        Alert.alert('Error', `Failed to share post: ${error.message}`);
     }
   };
-  // --- END REWRITE ---
 
-  const handleFeaturedPress = () => {
-    setPostData(prev => ({ ...prev, featured: !prev.featured }));
+  const handlePreviewPress = () => {
+    if (postData.featured) {
+      setShowPaymentModal(true);
+    } else {
+      setCurrentStep('preview');
+    }
   };
 
   const handlePaymentBuy = () => {
@@ -418,852 +227,97 @@ const MediaPostCreator = () => {
 
   const handlePaymentCancel = () => {
     setShowPaymentModal(false);
-    setPostData(prev => ({ ...prev, featured: false }));
-    setCurrentStep('details');
+    setPostData((prev) => ({ ...prev, featured: false }));
   };
 
-  const handlePreviewPress = () => {
-    if (postData.featured) {
-      setShowPaymentModal(true);
-    } else {
-      setShowPaymentModal(false);
-      setCurrentStep('preview');
+  const renderContent = () => {
+    if (showPaymentModal) {
+      return <PaymentScreen onBuy={handlePaymentBuy} onCancel={handlePaymentCancel} />;
+    }
+
+    // Pass "transparent" as backgroundColor to all child components so the background shows through
+    switch (currentStep) {
+      case 'media':
+        return (
+          <MediaSelection
+            selectedMedia={selectedMedia}
+            currentMediaIndex={currentMediaIndex}
+            setCurrentMediaIndex={setCurrentMediaIndex}
+            onMediaRemove={removeMedia}
+            onMediaSelect={pickMedia}
+            onNext={() => setCurrentStep('details')}
+            backgroundColor="transparent"
+            primaryColor={primaryColor as string}
+            onPrimaryColor={onPrimaryColor as string}
+            errorColor={errorColor as string}
+            onSurfaceVariantColor={onSurfaceVariantColor as string}
+          />
+        );
+      case 'details':
+        return (
+          <DetailsForm
+            postData={postData}
+            setPostData={setPostData}
+            onBack={() => setCurrentStep('media')}
+            onPreview={handlePreviewPress}
+            backgroundColor="transparent"
+            onBackgroundColor={onBackgroundColor as string}
+            primaryColor={primaryColor as string}
+            onPrimaryColor={onPrimaryColor as string}
+            surfaceColor={surfaceColor as string}
+            onSurfaceColor={onSurfaceColor as string}
+            onSurfaceVariantColor={onSurfaceVariantColor as string}
+            outlineVariantColor={outlineVariantColor as string}
+          />
+        );
+      case 'preview':
+        return (
+          <PostPreview
+            postData={postData}
+            selectedMedia={selectedMedia}
+            currentMediaIndex={currentMediaIndex}
+            setCurrentMediaIndex={setCurrentMediaIndex}
+            locationVisibility={locationVisibility}
+            onBack={() => setCurrentStep('details')}
+            onShare={handlePost}
+            backgroundColor="transparent"
+            onBackgroundColor={onBackgroundColor as string}
+            primaryColor={primaryColor as string}
+            onPrimaryColor={onPrimaryColor as string}
+            onSurfaceVariantColor={onSurfaceVariantColor as string}
+          />
+        );
+      default:
+        return null;
     }
   };
 
-  const renderMediaThumbnail = ({ item, index }: { item: MediaItem, index: number }) => (
-    <TouchableOpacity
-      style={[
-        styles.thumbnail,
-        index === currentMediaIndex && styles.activeThumbnail
-      ]}
-      onPress={() => setCurrentMediaIndex(index)}
-    >
-      <Image source={{ uri: item.uri }} style={styles.thumbnailImage} />
-      {item.type === 'video' && (
-        <View style={styles.videoIndicator}>
-          <Ionicons name="play" size={12} color="white" />
-        </View>
-      )}
-    </TouchableOpacity>
-  );
-
-  const renderMediaSelection = () => (
-    <ScrollView style={[styles.container, { backgroundColor: backgroundColor as string }]} showsVerticalScrollIndicator={false}>
-      <View style={styles.header}>
-        <ThemedText type="title">Select Media</ThemedText>
-        <ThemedText style={{ color: onSurfaceVariantColor as string }}>{selectedMedia.length}/20 selected</ThemedText>
-      </View>
-
-      {selectedMedia.length > 0 ? (
-        <View style={styles.mediaPreviewContainer}>
-          <View style={styles.mainMediaContainer}>
-            {selectedMedia[currentMediaIndex]?.type === 'video' ? (
-              <Video
-                source={{ uri: selectedMedia[currentMediaIndex]?.uri }}
-                style={styles.mainMedia}
-                useNativeControls
-                resizeMode={ResizeMode.CONTAIN}
-                isLooping={false}
-              />
-            ) : (
-              <Image
-                source={{ uri: selectedMedia[currentMediaIndex]?.uri }}
-                style={styles.mainMedia}
-                resizeMode="cover"
-              />
-            )}
-
-            <TouchableOpacity
-              style={[styles.removeButton, { backgroundColor: errorColor as string }]}
-              onPress={() => removeMedia(selectedMedia[currentMediaIndex]?.id)}
-            >
-              <Ionicons name="close" size={20} color="white" />
-            </TouchableOpacity>
-
-            {selectedMedia.length > 1 && (
-              <>
-                <TouchableOpacity
-                  style={[styles.navButton, styles.prevButton]}
-                  onPress={() => setCurrentMediaIndex(Math.max(0, currentMediaIndex - 1))}
-                  disabled={currentMediaIndex === 0}
-                >
-                  <Ionicons name="chevron-back" size={20} color={onPrimaryColor as string} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.navButton, styles.nextButton]}
-                  onPress={() => setCurrentMediaIndex(Math.min(selectedMedia.length - 1, currentMediaIndex + 1))}
-                  disabled={currentMediaIndex === selectedMedia.length - 1}
-                >
-                  <Ionicons name="chevron-forward" size={20} color={onPrimaryColor as string} />
-                </TouchableOpacity>
-              </>
-            )}
-          </View>
-
-          {selectedMedia.length > 1 && (
-            <FlatList
-              data={selectedMedia}
-              renderItem={renderMediaThumbnail}
-              keyExtractor={(item) => item.id.toString()}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.thumbnailList}
-              contentContainerStyle={styles.thumbnailContainer}
-            />
-          )}
-        </View>
-      ) : (
-        <ThemedView style={styles.emptyState}>
-          <Ionicons name="image-outline" size={60} color={onSurfaceVariantColor as string} />
-          <ThemedText type="subtitle" style={{ color: onSurfaceVariantColor as string, marginTop: 8 }}>No media selected</ThemedText>
-        </ThemedView>
-      )}
-
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[styles.selectButton, { backgroundColor: primaryColor as string }, selectedMedia.length >= 20 && styles.disabledButton]}
-          onPress={pickMedia}
-          disabled={selectedMedia.length >= 20}
-        >
-          <Ionicons name="images" size={20} color={onPrimaryColor as string} />
-          <ThemedText style={{ color: onPrimaryColor as string, fontWeight: '600' }}>Select from Gallery</ThemedText>
-        </TouchableOpacity>
-
-        {selectedMedia.length > 0 && (
-          <TouchableOpacity
-            style={[styles.nextStepButton, { backgroundColor: primaryColor as string }]}
-            onPress={() => setCurrentStep('details')}
-          >
-            <ThemedText style={{ color: onPrimaryColor as string, fontWeight: '600' }}>Next</ThemedText>
-          </TouchableOpacity>
-        )}
-      </View>
-    </ScrollView>
-  );
-
-  const renderDetailsForm = () => (
-    <ScrollView style={[styles.container, { backgroundColor: backgroundColor as string }]} showsVerticalScrollIndicator={false}>
-      <View style={styles.stepHeader}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => setCurrentStep('media')}
-        >
-          <Ionicons name="chevron-back" size={24} color={onBackgroundColor as string} />
-          <ThemedText style={{ color: onBackgroundColor as string }}>Back</ThemedText>
-        </TouchableOpacity>
-        <ThemedText type="title">Post Details</ThemedText>
-        <View style={styles.placeholder} />
-      </View>
-
-      <ThemedView style={styles.formContainer}>
-        <View style={styles.inputGroup}>
-          <ThemedText type="defaultSemiBold" style={styles.label}>Title (Optional)</ThemedText>
-          <TextInput
-            style={[styles.textInput, { color: onSurfaceColor as string, backgroundColor: surfaceColor as string, borderColor: outlineVariantColor as string }]}
-            value={postData.title}
-            onChangeText={(text) => setPostData({ ...postData, title: text })}
-            placeholder="Add a title..."
-            placeholderTextColor={onSurfaceVariantColor as string}
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <ThemedText type="defaultSemiBold" style={styles.label}>Description (Optional)</ThemedText>
-          <TextInput
-            style={[styles.textArea, { color: onSurfaceColor as string, backgroundColor: surfaceColor as string, borderColor: outlineVariantColor as string }]}
-            value={postData.description}
-            onChangeText={(text) => setPostData({ ...postData, description: text })}
-            placeholder="Write a caption..."
-            placeholderTextColor={onSurfaceVariantColor as string}
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-          />
-        </View>
-
-        
-
-        <View style={styles.inputGroup}>
-          <ThemedText type="defaultSemiBold" style={styles.label}>Visibility</ThemedText>
-          <View style={styles.visibilityContainer}>
-            {([
-              { value: 'public', icon: 'globe-outline', label: 'Public - Anyone can see this post' },
-              { value: 'private', icon: 'lock-closed-outline', label: 'Private - Only you can see this post' },
-              { value: 'friends', icon: 'people-outline', label: 'Friends - Only your friends can see this post' }
-            ] as const).map((option) => (
-              <TouchableOpacity
-                key={option.value}
-                style={styles.visibilityOption}
-                onPress={() => setPostData({ ...postData, visibility: option.value })}
-              >
-                <View style={styles.radioContainer}>
-                  <View style={[
-                    styles.radioButton,
-                    { borderColor: onSurfaceVariantColor as string },
-                    postData.visibility === option.value && [styles.radioButtonSelected, { borderColor: primaryColor as string }]
-                  ]}>
-                    {postData.visibility === option.value && (
-                      <View style={[styles.radioButtonInner, { backgroundColor: primaryColor as string }]} />
-                    )}
-                  </View>
-                  <Ionicons name={option.icon} size={20} color={onSurfaceColor as string} />
-                  <ThemedText style={styles.visibilityLabel}>{option.label}</ThemedText>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        <TouchableOpacity
-          style={styles.checkboxContainer}
-          onPress={handleFeaturedPress}
-        >
-          <View style={[styles.checkbox, { borderColor: onSurfaceVariantColor as string }, postData.featured && [styles.checkboxSelected, { backgroundColor: primaryColor as string, borderColor: primaryColor as string }]]}>
-            {postData.featured && <Ionicons name="checkmark" size={16} color={onPrimaryColor as string} />}
-          </View>
-          <Ionicons name="star-outline" size={20} color="#F59E0B" />
-          <ThemedText style={styles.checkboxLabel}>Featured Post</ThemedText>
-        </TouchableOpacity>
-      </ThemedView>
-
-      <TouchableOpacity
-        style={[styles.nextStepButton, { backgroundColor: primaryColor as string }]}
-        onPress={handlePreviewPress}
-      >
-        <ThemedText style={{ color: onPrimaryColor as string, fontWeight: '600' }}>Preview Post</ThemedText>
-      </TouchableOpacity>
-    </ScrollView>
-  );
-
-  const renderPreview = () => (
-    <ScrollView style={[styles.container, { backgroundColor: backgroundColor as string }]} showsVerticalScrollIndicator={false}>
-      <View style={styles.stepHeader}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => setCurrentStep('details')}
-        >
-          <Ionicons name="chevron-back" size={24} color={onBackgroundColor as string} />
-          <ThemedText style={{ color: onBackgroundColor as string }}>Back</ThemedText>
-        </TouchableOpacity>
-        <ThemedText type="title">Preview</ThemedText>
-        <View style={styles.placeholder} />
-      </View>
-
-      <ThemedView style={styles.previewPost}>
-        <View style={styles.postHeader}>
-          <View style={styles.userInfo}>
-            <View style={[styles.avatar, { backgroundColor: primaryColor as string }]}>
-              <ThemedText style={[styles.avatarText, { color: onPrimaryColor as string }]}>U</ThemedText>
-            </View>
-            <View>
-              <ThemedText type="defaultSemiBold" style={styles.username}>Your Username</ThemedText>
-              {postData.location && locationVisibility && (
-                <View style={styles.locationInfo}>
-                  <Ionicons name="location" size={12} color={onSurfaceVariantColor as string} />
-                  <ThemedText style={styles.locationText}>{postData.location.name}</ThemedText>
-                </View>
-              )}
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.postMedia}>
-          {selectedMedia[currentMediaIndex]?.type === 'video' ? (
-            <Video
-              source={{ uri: selectedMedia[currentMediaIndex]?.uri }}
-              style={styles.postImage}
-              useNativeControls
-              resizeMode={ResizeMode.CONTAIN}
-              isLooping={false}
-            />
-          ) : (
-            <Image
-              source={{ uri: selectedMedia[currentMediaIndex]?.uri }}
-              style={styles.postImage}
-              resizeMode="cover"
-            />
-          )}
-
-          {selectedMedia.length > 1 && (
-            <>
-              <TouchableOpacity
-                style={[styles.previewNavButton, styles.previewPrevButton]}
-                onPress={() => setCurrentMediaIndex(Math.max(0, currentMediaIndex - 1))}
-                disabled={currentMediaIndex === 0}
-              >
-                <Ionicons name="chevron-back" size={24} color={onPrimaryColor as string} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.previewNavButton, styles.previewNextButton]}
-                onPress={() => setCurrentMediaIndex(Math.min(selectedMedia.length - 1, currentMediaIndex + 1))}
-                disabled={currentMediaIndex === selectedMedia.length - 1}
-              >
-                <Ionicons name="chevron-forward" size={24} color={onPrimaryColor as string} />
-              </TouchableOpacity>
-            </>
-          )}
-
-          {selectedMedia.length > 1 && (
-            <View style={styles.mediaCounter}>
-              <ThemedText style={styles.mediaCounterText}>
-                {currentMediaIndex + 1}/{selectedMedia.length}
-              </ThemedText>
-            </View>
-          )}
-        </View>
-
-        <ThemedView style={styles.postContent}>
-          {postData.title && (
-            <ThemedText type="subtitle" style={styles.postTitle}>{postData.title}</ThemedText>
-          )}
-
-          {postData.description && (
-            <ThemedText style={styles.postDescription}>{postData.description}</ThemedText>
-          )}
-
-          <View style={styles.postMeta}>
-            <View style={styles.metaLeft}>
-              <View style={styles.metaItem}>
-                <Ionicons name="globe" size={14} color={onSurfaceVariantColor as string} />
-                <ThemedText style={styles.metaText}>{postData.visibility}</ThemedText>
-              </View>
-              {postData.featured && (
-                <View style={styles.metaItem}>
-                  <Ionicons name="star" size={14} color="#F59E0B" />
-                  <ThemedText style={styles.metaText}>Featured</ThemedText>
-                </View>
-              )}
-            </View>
-            <ThemedText style={styles.metaText}>
-              {selectedMedia.length} media item{selectedMedia.length !== 1 ? 's' : ''}
-            </ThemedText>
-          </View>
-        </ThemedView>
-      </ThemedView>
-
-      <TouchableOpacity
-        style={[styles.shareButton, { backgroundColor: primaryColor as string }]}
-        onPress={handlePost}
-      >
-        <ThemedText style={[styles.shareButtonText, { color: onPrimaryColor as string }]}>Share Post</ThemedText>
-      </TouchableOpacity>
-    </ScrollView>
-  );
-
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: backgroundColor as string }]}>
-      <View style={{ paddingTop: headerHeight, flex: 1 }}>
-        {showPaymentModal ? (
-          <PaymentScreen onBuy={handlePaymentBuy} onCancel={handlePaymentCancel} />
-        ) : (
-          <>
-            {currentStep === 'media' && renderMediaSelection()}
-            {currentStep === 'details' && renderDetailsForm()}
-            {currentStep === 'preview' && renderPreview()}
-          </>
-        )}
-      </View>
-    </SafeAreaView>
+    <ImageBackground source={backgroundImage} style={styles.backgroundImage} resizeMode="cover">
+      <View style={styles.overlay} />
+      <SafeAreaView style={styles.safeArea}>
+        <View style={{ paddingTop: headerHeight, flex: 1 }}>
+          {renderContent()}
+        </View>
+      </SafeAreaView>
+    </ImageBackground>
   );
 };
 
-const paymentStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.95)', 
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  header: {
-    marginBottom: 40,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#E0BBE4', 
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  description: {
-    fontSize: 16,
-    color: '#D1D5DB',
-    textAlign: 'center',
-    lineHeight: 24,
-    maxWidth: '90%',
-  },
-  planCard: {
-    backgroundColor: '#2D2D3A',
-    borderRadius: 20,
-    padding: 30,
-    alignItems: 'center',
-    marginBottom: 50,
-    width: '95%',
-    maxWidth: 400,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 15,
-    elevation: 15,
-    borderWidth: 1,
-    borderColor: '#4A4A5A', 
-  },
-  starIcon: {
-    marginBottom: 15,
-  },
-  planName: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: 'white',
-    marginTop: 10,
-    marginBottom: 5,
-  },
-  planPrice: {
-    fontSize: 42,
-    fontWeight: 'bold',
-    color: '#FFD700',
-    marginBottom: 10,
-  },
-  planDuration: {
-    fontSize: 16,
-    color: '#A0AEC0',
-    marginBottom: 20,
-  },
-  featuresList: {
-    marginTop: 15,
-    width: '100%',
-    alignItems: 'flex-start',
-    gap: 10,
-  },
-  featureItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  featureText: {
-    fontSize: 16,
-    color: '#E5E7EB',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    gap: 20,
-  },
-  buyButton: {
-    backgroundColor: '#00C853', 
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 12,
-    flex: 1,
-    alignItems: 'center',
-    shadowColor: '#00C853',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 5,
-    elevation: 6,
-  },
-  cancelButton: {
-    backgroundColor: '#FF3B30', 
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 12,
-    flex: 1,
-    alignItems: 'center',
-    shadowColor: '#FF3B30',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 5,
-    elevation: 6,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-});
-
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject, // This makes the view fill its parent
+    backgroundColor: 'rgba(0, 0, 0, 0.65)', // Dark overlay, adjust opacity as needed
+  },
   safeArea: {
     flex: 1,
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
-  counter: {
-    fontSize: 16,
-  },
-  mediaPreviewContainer: {
-    marginBottom: 20,
-  },
-  mainMediaContainer: {
-    position: 'relative',
-    aspectRatio: 1,
-    backgroundColor: '#000000',
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: 12,
-  },
-  mainMedia: {
-    width: '100%',
-    height: '100%',
-  },
-  videoOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  playButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    borderRadius: 30,
-    padding: 12,
-  },
-  removeButton: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    borderRadius: 20,
-    padding: 6,
-    zIndex: 1,
-  },
-  navButton: {
-    position: 'absolute',
-    top: '50%',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    borderRadius: 20,
-    padding: 8,
-  },
-  prevButton: {
-    left: 12,
-  },
-  nextButton: {
-    right: 12,
-  },
-  thumbnailList: {
-    marginTop: 0,
-  },
-  thumbnailContainer: {
-    paddingHorizontal: 4,
-  },
-  thumbnail: {
-    width: 64,
-    height: 64,
-    borderRadius: 8,
-    overflow: 'hidden',
-    marginHorizontal: 4,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  activeThumbnail: {
-    borderColor: Colors.light.primary,
-  },
-  thumbnailImage: {
-    width: '100%',
-    height: '100%',
-  },
-  videoIndicator: {
-    position: 'absolute',
-    top: 2,
-    right: 2,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    borderRadius: 8,
-    padding: 2,
-  },
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 40,
-    borderWidth: 2,
-    borderColor: '#D1D5DB',
-    borderStyle: 'dashed',
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  emptyText: {
-    fontSize: 16,
-    marginTop: 8,
-  },
-  buttonContainer: {
-    gap: 12,
-  },
-  selectButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    gap: 8,
-  },
-  disabledButton: {
-    backgroundColor: Colors.light.surfaceDisabled,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  nextStepButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 50,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginTop: 16,
-  },
-  stepHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 24,
-    paddingHorizontal: 8
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  backText: {
-    fontSize: 16,
-  },
-  placeholder: {
-    width: 64,
-  },
-  formContainer: {
-    gap: 16,
-    padding: 16,
-    borderRadius: 12,
-  },
-  inputGroup: {
-    gap: 8,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '500',
-    paddingLeft: 4,
-  },
-  textInput: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-  },
-  textArea: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    height: 120,
-    textAlignVertical: 'top',
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderWidth: 1,
-  },
-  locationTextDisplay: {
-    flex: 1,
-    fontSize: 16,
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 10,
-    paddingHorizontal: 5,
-  },
-  visibilityContainer: {
-    gap: 12,
-  },
-  visibilityOption: {
-    paddingVertical: 8,
-  },
-  radioContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  radioButton: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  radioButtonSelected: {
-    //
-  },
-  radioButtonInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  visibilityLabel: {
-    fontSize: 16,
-    flex: 1,
-  },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 8,
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxSelected: {
-    //
-  },
-  checkboxLabel: {
-    fontSize: 16,
-  },
-  previewPost: {
-    borderRadius: 12,
-    borderWidth: 1,
-    overflow: 'hidden',
-    marginBottom: 24,
-  },
-  postHeader: {
-    padding: 16,
-    borderBottomWidth: 1,
-  },
-  userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  username: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  locationInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 2,
-  },
-  locationText: {
-    fontSize: 14,
-  },
-  postMedia: {
-    position: 'relative',
-    aspectRatio: 1,
-    backgroundColor: '#000000',
-  },
-  postImage: {
-    width: '100%',
-    height: '100%',
-  },
-  mediaCounter: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  mediaCounterText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  previewNavButton: {
-    position: 'absolute',
-    top: '50%',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    borderRadius: 25,
-    padding: 10,
-    transform: [{ translateY: -25 }],
-    zIndex: 1,
-  },
-  previewPrevButton: {
-    left: 12,
-  },
-  previewNextButton: {
-    right: 12,
-  },
-  postContent: {
-    padding: 16,
-    gap: 12,
-  },
-  postTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  postDescription: {
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  postMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 8,
-    borderTopWidth: 1,
-  },
-  metaLeft: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  metaText: {
-    fontSize: 14,
-  },
-  shareButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 12,
-    marginBottom: 20,
-    marginTop: 20,
-  },
-  shareButtonText: {
-    fontSize: 18,
-    fontWeight: '700',
+    backgroundColor: 'transparent', // Make SafeAreaView transparent
   },
 });
 
 export default MediaPostCreator;
+
+    
