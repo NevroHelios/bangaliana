@@ -10,7 +10,6 @@ const TOKEN_KEY = "jwt-token";
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  token: string | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
@@ -146,7 +145,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, isLoading, login, register, logout, updateBookmarks }}>
       {children}
     </AuthContext.Provider>
   );
