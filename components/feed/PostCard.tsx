@@ -4,7 +4,6 @@ import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { Post, Comment } from "@/types"; // Make sure your types are correctly imported
-
 import { PostHeader } from './PostHeader';
 import { PostMedia } from './PostMedia';
 import { PostActions } from './PostActions';
@@ -29,7 +28,7 @@ export const PostCard = ({ item, onLike, onComment, onPress }: PostCardProps) =>
   const [isBookmarkedState, setIsBookmarkedState] = useState(user?.bookmarkedPosts?.includes(item._id) || false);
 
 
-  const isLiked = item.likes.includes(user?._id || '');
+  const isLiked = item.likes.includes(user?.id || '');
 
   const handleLike = async () => {
     // Optimistic update can be added here
@@ -84,7 +83,7 @@ export const PostCard = ({ item, onLike, onComment, onPress }: PostCardProps) =>
   };
 
   return (
-    <View style={[styles.card, { backgroundColor: cardBg }]}>
+    <View style={styles.card}>
       <TouchableOpacity activeOpacity={0.8} onPress={() => onPress(item)}>
         <PostHeader
           user={item.userId}
@@ -131,12 +130,15 @@ const styles = StyleSheet.create({
   card: {
     marginVertical: 12,
     marginHorizontal: 12,
-    borderRadius: 16,
-    // Shadow for a "lifted" feel, evoking a physical object
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+    borderRadius: 20,
+    // Glassmorphism effect
+    backgroundColor: 'rgba(33, 33, 33, 0.56)',
+    backdropFilter: 'blur(20px)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    // Enhanced shadow for depth
+    
+    // Additional glassmorphism properties
+    overflow: 'hidden',
   },
 });

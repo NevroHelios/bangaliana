@@ -55,3 +55,26 @@ export interface PostData {
   creativeContext: any;
   travelContext: any;
 }
+
+// ...other exports
+
+export type Post = {
+  _id: string;
+  userId: {
+    _id: string;
+    name: string;
+    // add other user fields as needed
+  };
+  title: string;
+  description: string;
+  tags: string[];
+  mediaItems: any[]; // replace 'any' with your actual media item type
+  likes: string[];
+  comments: Comment[];
+  location?: {
+    name: string;
+    // add other location fields as needed
+  };
+  createdAt: string;
+  // add other post fields as needed
+};

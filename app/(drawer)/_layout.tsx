@@ -174,7 +174,39 @@ function CustomDrawerContent(props: any) {
             }
           ]}>Profile</ThemedText>
         </Pressable>
-
+          <Pressable
+          style={[
+            styles.drawerItem,
+            pathname === "/communityEvent" && {
+              backgroundColor: primaryContainerColor as string,
+            },
+          ]}
+          onPress={() => router.push("/communityEvent" as any)}
+        >
+          <Ionicons
+            name="calendar-outline"
+            size={22}
+            color={
+              pathname === "/communityEvent"
+                ? (onPrimaryContainerColor as string)
+                : theme.onSurfaceVariant
+            }
+          />
+          <ThemedText
+            style={[
+              styles.drawerItemText,
+              {
+                color:
+                  pathname === "/communityEvent"
+                    ? (onPrimaryContainerColor as string)
+                    : (onSurfaceColor as string),
+                fontWeight: pathname === "/communityEvent" ? "700" : "500",
+              },
+            ]}
+          >
+            Community Event
+          </ThemedText>
+        </Pressable>
       </DrawerContentScrollView>
       
       <View style={[styles.footer, { paddingBottom: bottom + 10 }]}>

@@ -1,6 +1,6 @@
 // app/(tabs)/feed.tsx
 import React, { useEffect, useState, useCallback } from "react";
-import { View, FlatList, ActivityIndicator, Text, StyleSheet, Dimensions } from "react-native";
+import { View, FlatList, ActivityIndicator, Text, StyleSheet, Dimensions, ImageBackground } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { Post, Comment } from "@/types"; // Make sure your types are correctly imported
@@ -67,52 +67,70 @@ const Feed = () => {
 
   if (loading) {
     return (
-      <View style={[styles.centerContainer, { backgroundColor: bgColor }]}>
-        <ActivityIndicator size="large" color={primaryColor} />
-      </View>
+      <ImageBackground 
+        source={{ uri: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80' }}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay} />
+        <View style={[styles.centerContainer, styles.contentContainer]}>
+          <ActivityIndicator size="large" color={'white'} />
+        </View>
+      </ImageBackground>
     );
   }
 
   if (error) {
     return (
-      <View style={[styles.centerContainer, { backgroundColor: bgColor }]}>
-        <Text style={styles.errorText}>{error}</Text>
-      </View>
+      <ImageBackground 
+        source={{ uri: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80' }}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay} />
+        <View style={[styles.centerContainer, styles.contentContainer]}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      </ImageBackground>
     );
   }
 
   return (
     <>
-      <FlatList
-        data={posts}
-        renderItem={({ item }) => (
-          <PostCard
-            item={item}
-            onLike={handleLikeUpdate}
-            onComment={handleCommentUpdate}
-            onPress={handlePostPress}
+      <ImageBackground 
+        source={{ uri: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80' }}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay} />
+        <View style={styles.contentContainer}>
+          <FlatList
+            data={posts}
+            renderItem={({ item }) => (
+              <PostCard
+                item={item}
+                onLike={handleLikeUpdate}
+                onComment={handleCommentUpdate}
+                onPress={handlePostPress}
+              />
+            )}
+            keyExtractor={(item) => item._id}
+            contentContainerStyle={styles.flatListContent}
+            ListEmptyComponent={
+              <View style={styles.centerContainer}>
+                <Text style={[styles.emptyText, { color: 'white' }]}>
+                  No stories found. Be the first to share one!
+                </Text>
+              </View>
+            }
           />
-        )}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={{ backgroundColor: bgColor, paddingTop: 10 }}
-        ListEmptyComponent={
-          <View style={styles.centerContainer}>
-            <Text style={[styles.emptyText, { color: textColor }]}>
-              No stories found. Be the first to share one!
-            </Text>
-          </View>
-        }
-      />
+        </View>
+      </ImageBackground>
+      
       <PostDetailModal
         post={selectedPost}
-        visible={modalVisible}
+        isVisible={modalVisible}
         onClose={() => setModalVisible(false)}
-        onShowRecommendations={() => {
-          if (selectedPost) {
-            fetchSimilarPosts(selectedPost._id);
-            setRecommendationsVisible(true);
-          }
-        }}
       />
       {/* <RecommendationsModal
         visible={recommendationsVisible}
@@ -124,21 +142,47 @@ const Feed = () => {
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)', // Dark overlay for better content readability
+  },
+  contentContainer: {
+    flex: 1,
+    paddingVertical: 70,
+  },
+  flatListContent: {
+    paddingTop: 10,
+    paddingBottom: 20,
+  },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    height: Dimensions.get('window').height * 0.8,
+    minHeight: Dimensions.get('window').height * 0.6,
   },
   errorText: {
-    color: 'red',
+    color: '#ff6b6b',
     margin: 20,
     textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '600',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    padding: 15,
+    borderRadius: 10,
   },
   emptyText: {
     textAlign: "center",
     margin: 40,
     fontSize: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    padding: 20,
+    borderRadius: 10,
+    fontWeight: '500',
   },
 });
 
