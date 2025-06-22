@@ -29,41 +29,14 @@ export interface AISummary {
 }
 
 export interface MediaItem {
-  _id: string;
-  userId: string; // or User object
+  
+  id: number;
+  type: "image" | "video" | "livePhoto" | "pairedVideo" | undefined;
   uri: string;
-  type: 'photo' | 'video';
-  timestamp: number;
-  aspectRatio?: number;
-  title?: string;
-  description?: string;
-  likes: string[]; // Array of user IDs
-  comments: Comment[];
-  location?: Location;
-  tags?: string[];
-  aiSummary?: AISummary;
-  // Other context fields can be added if needed
-}
-
-export interface Post {
-  _id: string;
-  userId: User; // Populated
-  title?: string;
-  description?: string;
-  mediaItems: MediaItem[]; // Populated
-  tags: string[];
-  location?: {
-    type: 'Point';
-    coordinates: number[]; // [longitude, latitude]
-    name?: string; // This is what PostCard seems to expect, but backend has it in MediaItem
-  };
-  likes: string[]; // Array of user IDs
-  comments: Comment[];
-  featured: boolean;
-  visibility: 'public' | 'private' | 'community';
-  aiSummary?: AISummary;
-  createdAt: string; // Date string
-  updatedAt: string; // Date string
+  width: number;
+  height: number;
+  fileName?: string | null;
+  fileSize?: number;
 }
 
 export interface Space {
@@ -73,5 +46,27 @@ export interface Space {
   creatorId: string;
   timestamp: number;
   eventDate?: number;
-  subscribers: string[];
+  subscribers: string[]; // User IDs
+  // streamUrl?: string; // For live streaming
+  // posts: MediaItem[]; // Or a separate collection for space-specific posts
+}
+export interface LocationData {
+  name: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+export interface PostData {
+  userId: string;
+  mediaItems: MediaItem[];
+  title: string;
+  description: string;
+  location: LocationData | null;
+  visibility: 'public' | 'private' | 'friends';
+  featured: boolean;
+  comments: any[];
+  aiSummary: any;
+  culturalContext: any;
+  creativeContext: any;
+  travelContext: any;
 }
