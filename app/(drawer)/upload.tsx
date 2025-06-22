@@ -107,12 +107,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ onBuy, onCancel }) => {
 };
 
 const MediaPostCreator = () => {
-  const { user } = useAuth();
-  // If your AuthContext provides a method like getToken(), use it as shown below:
-  // const token = getToken();
-  // Or, if token is stored elsewhere, retrieve it accordingly.
-  // For now, set token to an empty string or fetch it from the correct place:
-  const token = ''; // TODO: Replace with actual token retrieval logic
+  const { user, token } = useAuth();
   const [currentStep, setCurrentStep] = useState('media');
   const [selectedMedia, setSelectedMedia] = useState<MediaItem[]>([]);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -283,6 +278,10 @@ const MediaPostCreator = () => {
 
   // --- REWRITE: handlePost using FormData with detailed debug logs and robust error detection ---
   const handlePost = async () => {
+    if (!user || !token) {
+      Alert.alert('Not Authenticated', 'You must be logged in to post.');
+      return;
+    }
     if (selectedMedia.length === 0) {
       Alert.alert('No Media', 'Please select at least one image or video to post.');
       return;
@@ -317,7 +316,7 @@ const MediaPostCreator = () => {
       });
 
       // Append other fields
-      formData.append('userId', postData.userId);
+      formData.append('userId', user.id); // Always use user.id
       formData.append('title', postData.title || '');
       formData.append('description', postData.description || '');
       formData.append('visibility', postData.visibility);
@@ -342,7 +341,6 @@ const MediaPostCreator = () => {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          // 'Content-Type': 'multipart/form-data', // Let fetch set this automatically
         },
         body: formData as any,
       });
