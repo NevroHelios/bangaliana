@@ -1,5 +1,4 @@
 import { CameraComponent } from '@/components/CameraView';
-import * as api from '@/services/api';
 import { Video } from 'expo-av';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -69,36 +68,20 @@ export default function CameraScreen() {
   };
 
   const handleConfirmUpload = async () => {
-    console.log('Confirming upload:', { preview });
     if (!preview) {
       setPreview(null);
       router.back();
       return;
     }
-    try {
-      console.log('Creating form data...');
-      const formData = new FormData();
-      formData.append('userId', 'anonymous');
-      formData.append('type', preview.type);
-      formData.append('timestamp', Date.now().toString());
-      if (preview.aspectRatio) formData.append('aspectRatio', preview.aspectRatio.toString());
-      formData.append('mediaFile', {
-        uri: preview.uri,
-        name: `media_${Date.now()}.${preview.uri.split('.').pop()}`,
-        type: preview.type === 'video' ? 'video/mp4' : 'image/jpeg',
-      } as any);
-      
-      console.log('Uploading media...');
-      await api.uploadMediaItem(formData, '');
-      console.log('Upload successful');
-      setPreview(null);
-      router.back();
-    } catch (error) {
-      console.error('Upload failed:', error);
-      setPreview(null);
-      Alert.alert('Error', 'Failed to save media.');
-      router.back();
-    }
+    // Instead of uploading directly, navigate to upload page with params
+    router.push({
+      pathname: '/(drawer)/upload',
+      params: {
+        imageUri: preview.uri,
+        imageAspectRatio: preview.aspectRatio?.toString(),
+      },
+    });
+    setPreview(null);
   };
 
   const handleDiscard = () => {

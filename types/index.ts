@@ -2,6 +2,7 @@ export interface User {
   id: string;
   name?: string;
   email: string;
+  bookmarkedPosts?: string[];
 }
 
 export interface Comment {
@@ -13,25 +14,14 @@ export interface Comment {
 }
 
 export interface MediaItem {
-  id: string; // Will be MongoDB ObjectId
-  uri: string; // URL from cloud storage
-  type: 'photo' | 'video';
-  timestamp: number;
-  aspectRatio?: number;
-  userId: string; // ID of the user who uploaded
-  title?: string; // Optional title for the media
-  description?: string; // Optional description
-  likes: string[]; // Array of user IDs who liked
-  comments: Comment[];
-  geminiStory?: {
-    [language: string]: string; // e.g., { en: "Story in English", bn: "বাংলা গল্প" }
-  };
-  location?: {
-    latitude: number;
-    longitude: number;
-    name?: string;
-  };
-  tags?: string[];
+  
+  id: number;
+  type: "image" | "video" | "livePhoto" | "pairedVideo" | undefined;
+  uri: string;
+  width: number;
+  height: number;
+  fileName?: string | null;
+  fileSize?: number;
 }
 
 export interface Space {
@@ -44,4 +34,24 @@ export interface Space {
   subscribers: string[]; // User IDs
   // streamUrl?: string; // For live streaming
   // posts: MediaItem[]; // Or a separate collection for space-specific posts
+}
+export interface LocationData {
+  name: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+export interface PostData {
+  userId: string;
+  mediaItems: MediaItem[];
+  title: string;
+  description: string;
+  location: LocationData | null;
+  visibility: 'public' | 'private' | 'friends';
+  featured: boolean;
+  comments: any[];
+  aiSummary: any;
+  culturalContext: any;
+  creativeContext: any;
+  travelContext: any;
 }
