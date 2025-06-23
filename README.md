@@ -244,4 +244,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**বঙ্গ-Lore** - *Preserving Bengali heritage through modern technology* 🇧🇩
+**বঙ্গ-Lore** - *Preserving Bengali heritage through modern technology* 🇮🇳
